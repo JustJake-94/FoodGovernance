@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Food Governance — Straat</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --sky1: #b8e4f0; --sky2: #dff0f8;
+  --road: #6b7280; --road-line: #e5e7eb;
+  --pavement: #9ca3af; --grass: #86efac;
+  --green-dark: #1b3a20; --green-mid: #2e7d32; --green-light: #4caf50;
+  --cream: #fefce8;
+  --font-d: 'Playfair Display', Georgia, serif;
+  --font-b: 'DM Sans', system-ui, sans-serif;
+  --shadow: 0 4px 24px rgba(0,0,0,0.13);
+}
+html, body { height: 100%; overflow: hidden; font-family: var(--font-b); }
+body { background: var(--sky1); }
+
+/* ══ TOPBAR ══ */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 52px; background: rgba(255,255,255,0.88); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  display: flex; align-items: center; gap: 1rem; padding: 0 1.5rem;
+}
+.top-logo { font-family: var(--font-d); font-size: 17px; font-weight: 900; color: var(--green-dark); }
+.top-visited { display: flex; gap: 4px; flex: 1; }
+.vis-dot {
+  width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1);
+  display: flex; align-items: center; justify-content: center; font-size: 13px;
+  background: rgba(255,255,255,0.5); transition: all 0.3s;
+}
+.vis-dot.done { background: var(--green-mid); border-color: var(--green-mid); }
+.top-chart-btn {
+  display: flex; align-items: center; gap: 6px; padding: 7px 16px;
+  background: var(--green-mid); color: #fff; border: none; border-radius: 50px;
+  font-family: var(--font-b); font-size: 12px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(46,125,50,0.35); transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.top-chart-btn:hover { background: #1b5e20; transform: translateY(-1px); }
+
+/* ══ SCREENS ══ */
+.screen { position: fixed; inset: 52px 0 0 0; display: none; }
+.screen.active { display: flex; }
+
+/* ══ STREET SCENE ══ */
+#streetScreen {
+  flex-direction: column; justify-content: flex-end;
+  background: linear-gradient(180deg, #b8e4f0 0%, #dff0f8 55%, #86efac 55%, #6ee7a0 60%);
+  overflow: hidden;
+}
+
+/* clouds */
+.cloud {
+  position: absolute; border-radius: 50px;
+  background: rgba(255,255,255,0.75);
+  animation: drift linear infinite;
+}
+@keyframes drift { from { transform: translateX(-200px); } to { transform: translateX(110vw); } }
+
+/* buildings row */
+.buildings-row {
+  position: absolute; bottom: 130px; left: 0; right: 0;
+  display: flex; justify-content: center; align-items: flex-end; gap: 18px;
+  padding: 0 2rem;
+}
+
+.building-wrap {
+  display: flex; flex-direction: column; align-items: center; cursor: pointer;
+  transition: transform 0.2s; position: relative;
+}
+.building-wrap:hover .building-body { filter: brightness(1.08); }
+.building-wrap:hover { transform: translateY(-6px); }
+.building-wrap.visited .building-body { filter: saturate(0.55) brightness(0.85); }
+.building-wrap.visited .b-banner { opacity: 0.5; }
+
+.building-body {
+  border-radius: 4px 4px 0 0; position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  transition: filter 0.2s;
+  box-shadow: 4px 0 0 rgba(0,0,0,0.08) inset, -4px 0 0 rgba(0,0,0,0.05) inset;
+}
+
+/* roof styles per building */
+.roof-flat  { width: 100%; height: 10px; background: rgba(0,0,0,0.15); border-radius: 4px 4px 0 0; }
+.roof-tri   { width: 0; height: 0; border-left: solid transparent; border-right: solid transparent; border-bottom: solid; }
+.roof-dome  { width: 100%; border-radius: 50% 50% 0 0; }
+
+.windows-row { display: flex; gap: 5px; margin-bottom: 10px; }
+.win {
+  width: 14px; height: 18px; border-radius: 2px 2px 0 0;
+  background: rgba(255,255,220,0.7); border: 1px solid rgba(0,0,0,0.15);
+}
+.win.lit { background: #fffde7; box-shadow: 0 0 6px 2px rgba(255,236,64,0.5); }
+
+.b-door {
+  width: 22px; height: 32px; border-radius: 3px 3px 0 0;
+  background: rgba(0,0,0,0.3); margin-bottom: 0; border: 1px solid rgba(0,0,0,0.2);
+}
+
+.b-label {
+  font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4); text-align: center;
+  max-width: 90px; line-height: 1.2;
+}
+
+.b-banner {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+  background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 8px; padding: 3px 7px; font-size: 18px; line-height: 1;
+}
+
+.b-check {
+  position: absolute; top: -12px; right: -8px;
+  width: 22px; height: 22px; background: var(--green-mid); border-radius: 50%;
+  display: none; align-items: center; justify-content: center;
+  font-size: 12px; color: #fff; box-shadow: 0 2px 6px rgba(46,125,50,0.4);
+}
+.building-wrap.visited .b-check { /* controlled by inline style */ }
+
+.b-name-tag {
+  font-size: 12px; font-weight: 700; color: var(--green-dark);
+  background: rgba(255,255,255,0.85); border-radius: 6px;
+  padding: 3px 10px; margin-top: 6px; text-align: center;
+}
+
+/* road */
+.road {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 110px;
+  background: #6b7280;
+}
+.road-line {
+  position: absolute; top: 50%; left: 0; right: 0;
+  height: 4px; background: repeating-linear-gradient(90deg, #e5e7eb 0px, #e5e7eb 40px, transparent 40px, transparent 80px);
+  transform: translateY(-50%);
+}
+.pavement {
+  position: absolute; top: 0; left: 0; right: 0; height: 18px;
+  background: #9ca3af; border-top: 2px solid #d1d5db;
+}
+
+/* ══ ENTER ANIMATION ══ */
+.enter-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0);
+  pointer-events: none; z-index: 10; transition: background 0.4s;
+}
+.entering .enter-overlay { background: rgba(0,0,0,0.7); }
+
+/* ══ INSIDE SCREEN ══ */
+#insideScreen {
+  flex-direction: column; background: var(--cream);
+  overflow-y: auto;
+}
+.inside-header {
+  padding: 1.5rem 2rem 1rem;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  display: flex; align-items: center; gap: 1rem;
+  flex-shrink: 0;
+}
+.inside-icon { font-size: 40px; }
+.inside-header-text h2 { font-family: var(--font-d); font-size: 22px; color: var(--green-dark); }
+.inside-header-text p  { font-size: 13px; color: #6b8870; margin-top: 2px; }
+.back-btn {
+  margin-left: auto; display: flex; align-items: center; gap: 5px;
+  font-size: 13px; font-weight: 600; color: var(--green-mid);
+  background: transparent; border: 2px solid rgba(46,125,50,0.3); border-radius: 50px;
+  padding: 7px 16px; cursor: pointer; transition: background 0.2s;
+}
+.back-btn:hover { background: #e8f5e9; }
+
+.inside-body { padding: 1.5rem 2rem; max-width: 900px; margin: 0 auto; width: 100%; }
+.inside-instruction { font-size: 14px; color: #6b8870; margin-bottom: 1.25rem; }
+
+/* CARD GRID inside */
+.cards-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.13);
+  cursor: pointer; transition: transform 0.18s, box-shadow 0.18s, opacity 0.15s;
+  position: relative; user-select: none; display: flex; flex-direction: column;
+  overflow: hidden; aspect-ratio: 2.5 / 3.7; border: 2.5px solid transparent;
+}
+.card:hover:not(.disabled):not(.clash) { transform: translateY(-6px) scale(1.02); box-shadow: 0 12px 36px rgba(0,0,0,0.18); }
+.card.selected { border-color: var(--green-mid); box-shadow: 0 0 0 3px var(--green-mid), 0 8px 28px rgba(46,125,50,0.30); transform: translateY(-4px) scale(1.01); }
+.card.disabled { opacity: 0.2; cursor: not-allowed; pointer-events: none; }
+.card.clash    { opacity: 0.22; cursor: not-allowed; pointer-events: none; border-color: rgba(211,47,47,0.4); }
+
+.card-hdr { padding: 14px 14px 6px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.card-hdr-icon { font-size: 22px; }
+.card-num { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.45); }
+
+.card-icon-wrap { display: flex; justify-content: center; padding: 4px 0 6px; flex-shrink: 0; }
+.card-big-icon { font-size: 38px; background: rgba(255,255,255,0.2); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+.card-body { background: #fff; padding: 10px 14px 8px; flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.card-title { font-family: var(--font-d); font-size: 17px; font-weight: 700; color: var(--green-dark); line-height: 1.2; text-align: center; }
+.card-desc  { font-size: 11.5px; color: #6b8870; line-height: 1.4; text-align: center; }
+.card-impacts { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 4px 0 2px; }
+.impact-pill { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-align: center; width: 100%; }
+
+.card-badge { position: absolute; top: -1px; right: 10px; width: 24px; height: 24px; background: var(--green-mid); border-radius: 0 0 8px 8px; display: none; align-items: center; justify-content: center; }
+.card.selected .card-badge { display: flex; }
+.card-badge svg { width: 14px; height: 14px; stroke: #fff; stroke-width: 2.5; fill: none; }
+
+.clash-bar { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(211,47,47,0.88); color: #fff; font-size: 9px; font-weight: 700; text-align: center; padding: 4px 6px; line-height: 1.3; display: none; }
+.card.clash .clash-bar { display: block; }
+
+.inside-next-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--green-mid); color: #fff; border: none; border-radius: 50px;
+  font-family: var(--font-b); font-size: 14px; font-weight: 600;
+  padding: 12px 28px; cursor: pointer; margin: 0 auto;
+  box-shadow: 0 4px 16px rgba(46,125,50,0.35); transition: background 0.2s, transform 0.15s;
+  opacity: 0.4; pointer-events: none;
+}
+.inside-next-btn.ready { opacity: 1; pointer-events: auto; }
+.inside-next-btn:hover { background: #1b5e20; transform: translateY(-2px); }
+
+/* ══ RESULTS SCREEN ══ */
+#resultsScreen {
+  flex-direction: column; background: var(--cream); overflow-y: auto;
+}
+.results-header {
+  padding: 2rem 2rem 1.25rem; border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.results-header h1 { font-family: var(--font-d); font-size: 30px; color: var(--green-dark); margin-bottom: 4px; }
+.results-header p  { font-size: 14px; color: #6b8870; }
+
+.results-body { padding: 1.5rem 2rem 3rem; max-width: 1100px; margin: 0 auto; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+.panel-box { background: #fff; border-radius: 16px; border: 1px solid rgba(0,0,0,0.06); padding: 1.25rem; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+.panel-box h2 { font-family: var(--font-d); font-size: 18px; color: var(--green-dark); margin-bottom: 1rem; }
+
+/* dual charts */
+.dual-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.chart-col { display: flex; flex-direction: column; align-items: center; }
+.chart-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.chart-lbl.goal   { color: #1565c0; }
+.chart-lbl.result { color: var(--green-mid); }
+.polar-wrap { position: relative; width: 100%; padding-bottom: 100%; }
+.polar-wrap canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+.match-section { margin: 0.75rem 0; }
+.match-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+.match-header span:first-child { font-size: 11px; font-weight: 700; color: var(--green-mid); text-transform: uppercase; letter-spacing: 0.06em; }
+.match-pct { font-family: var(--font-d); font-size: 28px; font-weight: 900; color: var(--green-dark); }
+.match-track { height: 12px; background: #f0fdf4; border-radius: 6px; overflow: hidden; border: 1px solid rgba(46,125,50,0.15); }
+.match-fill  { height: 100%; border-radius: 6px; transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+
+.r-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 0.75rem; }
+.r-legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #6b8870; }
+.ldot { width: 7px; height: 7px; border-radius: 50%; }
+
+/* picks */
+.picks-col { display: flex; flex-direction: column; gap: 0.75rem; }
+.pick-card-full { background: #fff; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 1px 6px rgba(0,0,0,0.06); display: flex; overflow: hidden; }
+.pick-stripe { width: 7px; flex-shrink: 0; }
+.pick-content { padding: 10px 12px; flex: 1; }
+.pick-cat   { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9ac09e; margin-bottom: 2px; }
+.pick-title { font-family: var(--font-d); font-size: 15px; font-weight: 700; color: var(--green-dark); margin-bottom: 2px; }
+.pick-desc  { font-size: 11px; color: #6b8870; line-height: 1.35; margin-bottom: 5px; }
+.pick-pills { display: flex; flex-wrap: wrap; gap: 3px; }
+.pick-pill  { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px; }
+.pick-icon  { width: 44px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+
+/* bars */
+.bars-full { grid-column: 1 / -1; }
+.theme-scores { display: flex; flex-direction: column; gap: 10px; }
+.th-row { display: flex; align-items: center; gap: 10px; }
+.th-icon { font-size: 16px; flex-shrink: 0; }
+.th-name { font-size: 13px; font-weight: 600; color: var(--green-mid); width: 120px; flex-shrink: 0; }
+.th-bars { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.b-row { display: flex; align-items: center; gap: 6px; }
+.b-tag { font-size: 9px; font-weight: 700; color: #9ac09e; width: 28px; text-align: right; flex-shrink: 0; }
+.b-bg  { flex: 1; height: 6px; background: #f0fdf4; border-radius: 3px; overflow: hidden; }
+.b-bar { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.b-val { font-size: 12px; font-weight: 700; width: 20px; text-align: right; flex-shrink: 0; }
+
+.restart-btn {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 1rem;
+  font-family: var(--font-b); font-size: 13px; font-weight: 600;
+  color: var(--green-mid); background: #e8f5e9; border: 2px solid rgba(46,125,50,0.25);
+  border-radius: 50px; padding: 9px 20px; cursor: pointer; transition: background 0.2s;
+}
+.restart-btn:hover { background: #c8e6c9; }
+
+/* ══ CARD INFO POPUP ══ */
+.popup-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0); backdrop-filter: blur(0px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem; pointer-events: none;
+  transition: background 0.25s, backdrop-filter 0.25s;
+}
+.popup-overlay.open {
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+  pointer-events: auto;
+}
+.popup-box {
+  background: #fff; border-radius: 20px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.22);
+  max-width: 520px; width: 100%;
+  transform: translateY(24px) scale(0.96);
+  opacity: 0; transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s ease;
+  overflow: hidden;
+}
+.popup-overlay.open .popup-box {
+  transform: translateY(0) scale(1); opacity: 1;
+}
+.popup-card-header {
+  padding: 1.5rem 1.5rem 1rem;
+  display: flex; align-items: flex-start; gap: 1rem;
+}
+.popup-big-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; flex-shrink: 0;
+}
+.popup-header-text { flex: 1; }
+.popup-cat { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #9ac09e; margin-bottom: 3px; }
+.popup-title { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; font-weight: 900; color: #1b3a20; line-height: 1.2; margin-bottom: 4px; }
+.popup-desc { font-size: 13px; color: #6b8870; line-height: 1.5; }
+.popup-close {
+  width: 30px; height: 30px; border-radius: 50%; border: none;
+  background: #f3f4f6; cursor: pointer; font-size: 16px; color: #6b7280;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: background 0.15s;
+}
+.popup-close:hover { background: #e5e7eb; }
+
+.popup-info {
+  padding: 0 1.5rem 1rem;
+  font-size: 13.5px; color: #374151; line-height: 1.7;
+  border-top: 1px solid #f3f4f6; padding-top: 1rem;
+}
+
+.popup-impacts {
+  padding: 0.75rem 1.5rem;
+  display: flex; flex-wrap: wrap; gap: 5px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.popup-actions {
+  padding: 1rem 1.5rem 1.5rem;
+  display: flex; gap: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+}
+.popup-btn-back {
+  flex: 1; padding: 12px; border-radius: 50px; border: 2px solid rgba(46,125,50,0.3);
+  background: transparent; color: #2e7d32; font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+}
+.popup-btn-back:hover { background: #e8f5e9; }
+.popup-btn-claim {
+  flex: 2; padding: 12px; border-radius: 50px; border: none;
+  background: #2e7d32; color: #fff; font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(46,125,50,0.35);
+  transition: background 0.2s, transform 0.15s;
+}
+.popup-btn-claim:hover { background: #1b5e20; transform: translateY(-1px); }
+
+@media (max-width: 800px) {
+  .buildings-row { gap: 6px; padding: 0 0.5rem; }
+  .cards-grid { grid-template-columns: 1fr 1fr; }
+  .results-body { grid-template-columns: 1fr; }
+  .dual-charts { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 500px) {
+  .cards-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="top-logo">🌱 Food Governance</div>
+  <div class="top-visited" id="topVisited"></div>
+  <button class="top-chart-btn" onclick="showResults()">📊 Bekijk grafiek</button>
+</div>
+
+<!-- STREET SCREEN -->
+<div class="screen active" id="streetScreen">
+  <!-- clouds -->
+  <div class="cloud" style="width:120px;height:40px;top:14%;left:-10%;animation-duration:28s;animation-delay:0s;opacity:0.7"></div>
+  <div class="cloud" style="width:80px;height:28px;top:22%;left:30%;animation-duration:38s;animation-delay:6s;opacity:0.55"></div>
+  <div class="cloud" style="width:160px;height:50px;top:10%;left:60%;animation-duration:32s;animation-delay:12s;opacity:0.65"></div>
+  <div class="cloud" style="width:90px;height:30px;top:30%;left:80%;animation-duration:24s;animation-delay:4s;opacity:0.5"></div>
+
+  <!-- sun -->
+  <div style="position:absolute;top:12%;right:8%;width:56px;height:56px;background:radial-gradient(circle,#fffde7,#fdd835 60%,transparent 70%);border-radius:50%;box-shadow:0 0 40px 20px rgba(253,216,53,0.25)"></div>
+
+  <div class="buildings-row" id="buildingsRow"></div>
+  <div class="road"><div class="pavement"></div><div class="road-line"></div></div>
+
+  <!-- welcome card -->
+  <div id="welcomeCard" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);background:rgba(255,255,255,0.95);border-radius:20px;padding:2rem 2.5rem;max-width:420px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.15);backdrop-filter:blur(8px);">
+    <div style="font-size:40px;margin-bottom:0.75rem">🏘️</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:22px;color:#1b3a20;margin-bottom:0.5rem">Welkom in de Food Governance straat</h2>
+    <p style="font-size:13px;color:#6b8870;line-height:1.6;margin-bottom:1.5rem">Bezoek alle zes gebouwen in jouw eigen volgorde. In elk gebouw kies je één beleidskaart. Na alle gebouwen zie je hoe jouw keuzes passen bij het bedrijfsdoel.</p>
+    <button onclick="document.getElementById('welcomeCard').style.display='none'" style="background:#2e7d32;color:#fff;border:none;border-radius:50px;padding:11px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 4px 14px rgba(46,125,50,0.35)">Start je rondgang →</button>
+  </div>
+</div>
+
+<!-- INSIDE SCREEN -->
+<div class="screen" id="insideScreen">
+  <div class="inside-header" id="insideHeader"></div>
+  <div class="inside-body">
+    <p class="inside-instruction" id="insideInstruction"></p>
+    <div class="cards-grid" id="cardsGrid"></div>
+    <button class="inside-next-btn" id="nextBtn" onclick="leaveBuilding()">Terug naar de straat →</button>
+  </div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div class="screen" id="resultsScreen">
+  <div class="results-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem">
+      <div>
+        <h1 id="resultsTitle">Jouw beleidsresultaat</h1>
+        <p id="resultsSubtitle">Hieronder zie je hoe jouw keuzes zich verhouden tot het bedrijfsdoel.</p>
+      </div>
+      <div style="display:flex;gap:0.75rem;align-items:center">
+        <button class="restart-btn" onclick="showScreen('streetScreen');renderStreet()">← Terug naar straat</button>
+        <button class="restart-btn" onclick="restartGame()">↩ Opnieuw beginnen</button>
+      </div>
+    </div>
+  </div>
+  <div class="results-body">
+    <div class="panel-box">
+      <h2>Impact op thema's</h2>
+      <div class="dual-charts">
+        <div class="chart-col"><div class="chart-lbl goal">🎯 Bedrijfsdoel</div><div class="polar-wrap"><canvas id="goalChart"></canvas></div></div>
+        <div class="chart-col"><div class="chart-lbl result">📊 Jouw keuze</div><div class="polar-wrap"><canvas id="resultChart"></canvas></div></div>
+      </div>
+      <div class="match-section">
+        <div class="match-header"><span>Overeenkomst met bedrijfsdoel</span><span class="match-pct" id="matchPct">—</span></div>
+        <div class="match-track"><div class="match-fill" id="matchFill" style="width:0%"></div></div>
+      </div>
+      <div class="r-legend" id="rLegend"></div>
+    </div>
+
+    <div class="panel-box">
+      <h2>Gekozen kaarten</h2>
+      <div class="picks-col" id="picksList"></div>
+    </div>
+
+    <div class="panel-box bars-full">
+      <h2>Scores per thema</h2>
+      <div class="theme-scores" id="themeBars"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CARD INFO POPUP -->
+<div class="popup-overlay" id="popupOverlay">
+  <div class="popup-box" id="popupContent"></div>
+</div>
+
+<script>
+/* ══════════════════════════════════
+   DATA
+══════════════════════════════════ */
+const THEMES       = ['Emissies','Biodiversiteit','Eerlijke keten','Gezondheid','Betaalbaarheid','Inclusiviteit'];
+const THEME_COLORS = ['#4a90d9','#6ab04c','#e07090','#e8613a','#f0c040','#b06ab0'];
+const THEME_FILL   = ['rgba(74,144,217,0.72)','rgba(106,176,76,0.72)','rgba(224,112,144,0.72)','rgba(232,97,58,0.72)','rgba(240,192,64,0.72)','rgba(176,106,176,0.72)'];
+const THEME_FILL_G = ['rgba(74,144,217,0.18)','rgba(106,176,76,0.18)','rgba(224,112,144,0.18)','rgba(232,97,58,0.18)','rgba(240,192,64,0.18)','rgba(176,106,176,0.18)'];
+const THEME_ICONS  = ['💨','🌿','🤝','❤️','💶','👐'];
+const BASELINE = 2;
+const GOAL = { 'Emissies':8,'Biodiversiteit':7,'Eerlijke keten':7,'Gezondheid':6,'Betaalbaarheid':5,'Inclusiviteit':7 };
+
+const THEME_PILL = {
+  'Emissies':      { bg:'#d6eeff', text:'#0c3f72' },
+  'Biodiversiteit':{ bg:'#e2f4cc', text:'#254a0a' },
+  'Eerlijke keten':{ bg:'#fde6ee', text:'#6b1535' },
+  'Gezondheid':    { bg:'#fde8e0', text:'#8b2500' },
+  'Betaalbaarheid':{ bg:'#fef5d0', text:'#6b4a00' },
+  'Inclusiviteit': { bg:'#f3e0f3', text:'#5a1a5a' },
+};
+
+// Building designs: elk gebouw = één thema
+const BUILDINGS = [
+  { id:'emissies',      label:'Emissies',      fullLabel:'Emissies',      icon:'💨', color:'#1565c0',
+    bColor:'#42a5f5', roofType:'tri',  roofColor:'#0d47a1', desc:'Verminder de uitstoot van broeikasgassen in de voedselketen.' },
+  { id:'biodiversiteit',label:'Biodiversiteit',fullLabel:'Biodiversiteit',icon:'🌿', color:'#2e7d32',
+    bColor:'#66bb6a', roofType:'dome', roofColor:'#1b5e20', desc:'Bescherm en bevorder de natuurlijke diversiteit van ecosystemen.' },
+  { id:'eerlijkeketen', label:'Eerlijke keten', fullLabel:'Eerlijke keten', icon:'🤝', color:'#e07090',
+    bColor:'#f48fb1', roofType:'flat', roofColor:'#c2185b', desc:'Zorg voor eerlijke beloning en transparantie in de hele keten.' },
+  { id:'gezondheid',    label:'Gezondheid',    fullLabel:'Gezondheid',    icon:'❤️', color:'#c62828',
+    bColor:'#ef5350', roofType:'tri',  roofColor:'#b71c1c', desc:'Bied gezonde en voedzame maaltijden aan voor iedereen.' },
+  { id:'betaalbaarheid',label:'Betaalbaarheid',fullLabel:'Betaalbaarheid',icon:'💶', color:'#f57f17',
+    bColor:'#ffca28', roofType:'dome', roofColor:'#e65100', desc:'Maak gezond en duurzaam eten betaalbaar voor alle medewerkers.' },
+  { id:'inclusiviteit', label:'Inclusiviteit', fullLabel:'Inclusiviteit', icon:'👐', color:'#6a1b9a',
+    bColor:'#ab47bc', roofType:'flat', roofColor:'#4a148c', desc:'Zorg dat het aanbod aansluit bij alle achtergronden en behoeften.' },
+];
+
+const CARDS = [
+  // ── EMISSIES ──
+  { id:1, cat:'emissies', icon:'📍', title:'MEER Lokaal', color:'#1565c0,#1e88e5',
+    desc:'Inkoop van ingrediënten zo lokaal mogelijk organiseren.',
+    info:`Lokale inkoop vermindert transportemissies aanzienlijk. Korte ketens betekenen minder vrachtwagentransport over lange afstanden. Nederland heeft een rijke regio-agrarische sector die veel producten kan leveren. Lokaal inkopen versterkt ook de regionale economie en maakt de keten transparanter. Een bijkomend voordeel is dat seizoensproducten automatisch centraler komen te staan, wat de biodiversiteit ten goede komt.`,
+    impacts:{ 'Emissies':5, 'Biodiversiteit':2, 'Eerlijke keten':2, 'Betaalbaarheid':1, 'Gezondheid':-1 },
+    clashes:[7,14], clashReason:'Botst met Fair Trade (lokaal vs. globaal) & Grotere volumes (vaste leveranciers)' },
+  { id:2, cat:'emissies', icon:'⚡', title:'MEER Groene energie', color:'#0d47a1,#42a5f5',
+    desc:'Productie en bereiding met 100% hernieuwbare energie.',
+    info:`De energieverbruik van keukens en cateringbedrijven is aanzienlijk. Overstappen op groene stroom en zonnepanelen reduceert de CO₂-voetafdruk van de bereiding drastisch. Warmtepompen en inductiekoken verlagen het gasverbruik. Investering in groene energie heeft hogere opstartkosten maar levert op lange termijn kostenbesparing op. Het is ook een zichtbaar signaal naar medewerkers en klanten.`,
+    impacts:{ 'Emissies':5, 'Betaalbaarheid':-2, 'Biodiversiteit':1, 'Gezondheid':0 },
+    clashes:[14,15], clashReason:'Botst met Grotere volumes & Eenvoudig assortiment (investeringsbudget onder druk)' },
+  { id:3, cat:'emissies', icon:'🥦', title:'MEER Plantaardig', color:'#1b5e20,#66bb6a',
+    desc:'Plantaardige maaltijden als standaard in het aanbod.',
+    info:`De productie van dierlijke eiwitten stoot 5 tot 10 keer meer CO₂ uit dan plantaardige alternatieven. Door plantaardig als standaard te maken daalt de klimaatimpact van elke maaltijd fors. Onderzoek toont dat "default nudging" — plantaardig als standaard aanbieden — de consumptie ervan met 30–50% verhoogt. Dit vraagt aandacht voor smaak en communicatie richting medewerkers.`,
+    impacts:{ 'Emissies':5, 'Biodiversiteit':3, 'Gezondheid':2, 'Inclusiviteit':-1, 'Betaalbaarheid':1 },
+    clashes:[16,18], clashReason:'Botst met Halal & Koosjer (aparte bereiding nodig) & Goedkope maaltijden (kostprijs stijgt)' },
+
+  // ── BIODIVERSITEIT ──
+  { id:4, cat:'biodiversiteit', icon:'🦋', title:'MEER NatuurInclusiviteit', color:'#2e7d32,#4caf50',
+    desc:'Leveranciers kiezen die natuur-inclusief boeren.',
+    info:`Natuur-inclusieve landbouw combineert voedselproductie met herstel van ecosystemen. Boeren laten bloemenranden staan, vermijden pesticiden en herstellen bodemleven. Door actief te kiezen voor zulke leveranciers geef je als afnemer een marktsignaal. Dit vergt soms hogere inkoopprijs maar draagt bij aan structurele verbetering van biodiversiteit in het landschap rondom productielocaties.`,
+    impacts:{ 'Biodiversiteit':5, 'Emissies':2, 'Gezondheid':1, 'Betaalbaarheid':-2, 'Eerlijke keten':1 },
+    clashes:[14,15], clashReason:'Botst met Grotere volumes & Eenvoudig assortiment (vereist diverse kleine leveranciers)' },
+  { id:5, cat:'biodiversiteit', icon:'🍂', title:'MEER Seizoensproducten', color:'#388e3c,#81c784',
+    desc:'Menuaanbod volledig afgestemd op wat het seizoen biedt.',
+    info:`Seizoensgebonden eten vermindert de behoefte aan energie-intensieve kassen en lange transportroutes. Seizoensgroenten zijn doorgaans ook rijker aan voedingsstoffen omdat ze op het juiste moment geoogst worden. Het vraagt flexibiliteit in de keuken en communicatie naar medewerkers, maar creëert ook variatie en verbondenheid met de natuur. Lokale boeren profiteren direct van seizoensinkoop.`,
+    impacts:{ 'Biodiversiteit':5, 'Emissies':2, 'Gezondheid':2, 'Betaalbaarheid':1, 'Inclusiviteit':-1 },
+    clashes:[15,17], clashReason:'Botst met Eenvoudig assortiment (wisselend menu) & Vegetarische alternatieven (seizoen beperkt opties)' },
+  { id:6, cat:'biodiversiteit', icon:'🌾', title:'MEER Variatie in gewassen', color:'#1b5e20,#a5d6a7',
+    desc:'Gebruik van diverse en vergeten granen, peulvruchten en groenten.',
+    info:`Monoteelt domineert de moderne landbouw: 75% van ons voedsel komt van slechts 12 gewassen. Het actief inkopen van vergeten groenten, oude graanrassen en diverse peulvruchten stimuleert boeren om meer te diversifiëren. Dit verbetert de bodemgezondheid, verlaagt ziektedruk en vergroot de veerkracht van het voedselsysteem. Bijkomend voordeel: unieke smaken en interessante menusamenstelling.`,
+    impacts:{ 'Biodiversiteit':5, 'Gezondheid':2, 'Eerlijke keten':2, 'Betaalbaarheid':-1, 'Emissies':1 },
+    clashes:[15], clashReason:'Botst met Eenvoudig assortiment (meer ingrediënten = complexer)' },
+
+  // ── EERLIJKE KETEN ──
+  { id:7, cat:'eerlijkeketen', icon:'🌍', title:'MEER Fair Trade', color:'#c2185b,#f48fb1',
+    desc:'Alle tropische ingrediënten met Fairtrade-keurmerk.',
+    info:`Fairtrade garandeert boeren in lage-inkomenslanden een minimumprijs en toegang tot premies voor gemeenschappelijke projecten zoals scholen en ziekenhuizen. Het systeem heeft bewezen impact in cacaoboeren-gemeenschappen in West-Afrika en koffieboeren in Latijns-Amerika. Fairtrade-producten kosten iets meer maar de meerprijs gaat direct naar de producent.`,
+    impacts:{ 'Eerlijke keten':5, 'Inclusiviteit':1, 'Betaalbaarheid':-2, 'Emissies':-1, 'Gezondheid':1 },
+    clashes:[1,18], clashReason:'Botst met Lokaal (lokaal vs. globaal) & Goedkope maaltijden (hogere inkoopprijs)' },
+  { id:8, cat:'eerlijkeketen', icon:'🤲', title:'MEER Samenwerking met producenten', color:'#ad1457,#ec407a',
+    desc:'Directe langetermijnrelaties met boeren en producenten.',
+    info:`Directe samenwerking met producenten — zonder tussenpersonen — geeft boeren meer zekerheid en een eerlijker prijs. Voor het bedrijf betekent het meer grip op kwaliteit en herkomst. Langdurige contracten geven boeren de ruimte om te investeren in duurzamere productiemethoden. Dit model wordt steeds vaker toegepast door vooruitstrevende cateraars in Nederland.`,
+    impacts:{ 'Eerlijke keten':5, 'Biodiversiteit':2, 'Betaalbaarheid':-1, 'Gezondheid':1, 'Emissies':1 },
+    clashes:[14], clashReason:'Botst met Grotere volumes inkopen (coöperatieve inkoop doorbreekt directe relaties)' },
+  { id:9, cat:'eerlijkeketen', icon:'📲', title:'MEER Transparante Herkomst', color:'#880e4f,#ce93d8',
+    desc:'QR-code met volledige herkomstinformatie op elk product.',
+    info:`Consumenten en medewerkers willen steeds vaker weten waar hun eten vandaan komt. Een QR-code op verpakking of menukaart die doorlinkt naar herkomstinformatie bouwt vertrouwen op. Blockchain-technologie maakt het mogelijk om van elk ingrediënt exact de reis te traceren. Bedrijven die dit inzetten zien hogere betrokkenheid en waardering van medewerkers voor duurzaam beleid.`,
+    impacts:{ 'Eerlijke keten':5, 'Inclusiviteit':2, 'Betaalbaarheid':-1, 'Emissies':0, 'Gezondheid':1 },
+    clashes:[15], clashReason:'Botst met Eenvoudig assortiment (transparantie vereist meer data per product)' },
+
+  // ── GEZONDHEID ──
+  { id:10, cat:'gezondheid', icon:'🍽️', title:'MEER Kleinere porties', color:'#b71c1c,#ef5350',
+    desc:'Standaard kleinere porties met optie voor aanvulling.',
+    info:`Overconsumptie is een groot gezondheidsprobleem. Kleinere standaardporties verminderen calorie-inname zonder dat medewerkers iets hoeven te weigeren — ze kunnen altijd bijhalen. Dit principe heet "portion size nudging" en is wetenschappelijk bewezen effectief. Bijkomend voordeel: minder voedselverspilling en lagere inkoopkosten. Communicatie over de reden vergroot acceptatie.`,
+    impacts:{ 'Gezondheid':5, 'Betaalbaarheid':2, 'Emissies':1, 'Biodiversiteit':1, 'Inclusiviteit':-1 },
+    clashes:[18], clashReason:'Botst met Goedkope maaltijden (kleine porties voelen minder waardevol voor lager budget)' },
+  { id:11, cat:'gezondheid', icon:'🥕', title:'MEER Fruit en groente', color:'#c62828,#ff7043',
+    desc:'Minimaal 50% van elke maaltijd bestaat uit groenten en fruit.',
+    info:`De Schijf van Vijf adviseert 250 gram groenten en 2 stuks fruit per dag. In de praktijk halen de meeste Nederlanders dit niet. Door fruit en groenten centraal te stellen in het cateringaanbod maak je gezond eten de makkelijke keuze. Verse groenten zijn ook goedkoper dan vleescomponenten, wat de betaalbaarheid ten goede komt. Kleurrijke borden verhogen ook de eetbeleving.`,
+    impacts:{ 'Gezondheid':5, 'Biodiversiteit':2, 'Emissies':2, 'Betaalbaarheid':1, 'Inclusiviteit':1 },
+    clashes:[15], clashReason:'Botst met Eenvoudig assortiment (gevarieerd groente-aanbod verhoogt complexiteit)' },
+  { id:12, cat:'gezondheid', icon:'🌿', title:'MEER Verse producten', color:'#d32f2f,#e57373',
+    desc:'Zo min mogelijk bewerkt voedsel; dagelijks vers bereid.',
+    info:`Ultra-bewerkt voedsel is gelinkt aan verhoogd risico op obesitas, diabetes type 2 en hart- en vaatziekten. Dagelijks vers bereiden verhoogt de voedingswaarde en vermindert toevoegingen als zout, suiker en conserveermiddelen. Het vraagt meer keukenvaardigheden en tijd, maar medewerkers waarderen de kwaliteitsverbetering sterk. Verse bereiding vergroot ook de betrokkenheid van keukenpersoneel.`,
+    impacts:{ 'Gezondheid':5, 'Eerlijke keten':1, 'Betaalbaarheid':-2, 'Emissies':-1, 'Inclusiviteit':1 },
+    clashes:[14,15], clashReason:'Botst met Grotere volumes (vers past niet bij bulkinkoop) & Eenvoudig assortiment' },
+
+  // ── BETAALBAARHEID ──
+  { id:13, cat:'betaalbaarheid', icon:'♻️', title:'MEER Minder voedselverspilling', color:'#e65100,#ffca28',
+    desc:'Productie en inkoop optimaliseren om verspilling te halveren.',
+    info:`In Nederland gooit de foodservicesector jaarlijks miljoenen kilo's voedsel weg. Slimmere inkoopplanning, betere portionering en gebruik van reststromen kunnen verspilling halveren. Dat scheelt direct in kosten: minder inkoop, minder afvalverwerking. Maaltijdplanningssoftware en dagelijkse voorraadinventarisatie zijn bewezen effectieve tools. Minder verspilling is ook goed voor het klimaat.`,
+    impacts:{ 'Betaalbaarheid':5, 'Emissies':3, 'Biodiversiteit':1, 'Gezondheid':0, 'Eerlijke keten':1 },
+    clashes:[6], clashReason:'Botst met Variatie in gewassen (meer soorten = meer risico op verspilling)' },
+  { id:14, cat:'betaalbaarheid', icon:'📦', title:'MEER Grotere volumes inkopen', color:'#f57f17,#ffa726',
+    desc:'Schaalvoordelen benutten door gezamenlijk of in bulk in te kopen.',
+    info:`Gezamenlijke inkoop met andere bedrijven of inkoopcoöperaties geeft onderhandelingsvoordeel. Grotere volumes leiden tot lagere stuksprijzen. Dit model werkt goed voor droge producten, conserven en non-food. Voor verse producten is het lastiger vanwege houdbaarheid. Inkoopcoöperaties in de zorgsector tonen aan dat 10–20% kostenbesparing haalbaar is zonder in te leveren op kwaliteit.`,
+    impacts:{ 'Betaalbaarheid':5, 'Emissies':-1, 'Eerlijke keten':-2, 'Biodiversiteit':-1, 'Gezondheid':0 },
+    clashes:[1,4,8,12], clashReason:'Botst met Lokaal, NatuurInclusiviteit, Samenwerking met producenten & Verse producten' },
+  { id:15, cat:'betaalbaarheid', icon:'🍱', title:'MEER Eenvoudig assortiment', color:'#bf360c,#ff8a65',
+    desc:'Compacter menu met minder SKUs en minder complexe recepten.',
+    info:`Een kleiner, goed uitgevoerd menu is goedkoper dan een breed assortiment met veel verschillende ingrediënten. Minder SKUs betekent minder inkoopverspilling, eenvoudigere logistiek en beter inkoopbeheer. Succesvolle cateraars tonen aan dat minder keuze vaak leidt tot hogere tevredenheid. Medewerkers hoeven minder te beslissen en de keuken werkt efficiënter.`,
+    impacts:{ 'Betaalbaarheid':5, 'Inclusiviteit':-3, 'Emissies':1, 'Gezondheid':-1, 'Biodiversiteit':-1 },
+    clashes:[5,6,9,11,12], clashReason:'Botst met Seizoensproducten, Variatie in gewassen, Transparante Herkomst, Fruit & groente & Verse producten' },
+
+  // ── INCLUSIVITEIT ──
+  { id:16, cat:'inclusiviteit', icon:'🕌', title:'MEER Halal en Koosjer opties', color:'#6a1b9a,#ab47bc',
+    desc:'Gecertificeerde halal en koosjer maaltijden structureel in het aanbod.',
+    info:`In Nederland is circa 5% van de bevolking moslim en een kleinere groep joods. Zonder passende opties zijn deze medewerkers aangewezen op alternatief eten van buiten, wat hen uitsluit van de gemeenschappelijke eetcultuur op het werk. Gecertificeerde halal en koosjer catering vereist gescheiden bereidingsruimte of specifieke leveranciers, maar de investering vergroot inclusie significant.`,
+    impacts:{ 'Inclusiviteit':5, 'Eerlijke keten':1, 'Betaalbaarheid':-2, 'Gezondheid':1, 'Biodiversiteit':0 },
+    clashes:[3,15], clashReason:'Botst met Plantaardig als default (halal vereist vlees-opties) & Eenvoudig assortiment' },
+  { id:17, cat:'inclusiviteit', icon:'🥗', title:'MEER Vegetarische alternatieven', color:'#7b1fa2,#ce93d8',
+    desc:'Volwaardig vegetarisch alternatief bij elke maaltijd.',
+    info:`Circa 5% van de Nederlanders eet vegetarisch, maar veel meer mensen eten flexitarisch of kiezen regelmatig voor vleesvervanger. Een volwaardig, smakelijk vegetarisch alternatief bij elke maaltijd is geen luxe maar een basisvereiste voor een inclusief aanbod. Bovendien is vegetarisch doorgaans goedkoper in inkoop dan vlees, wat de betaalbaarheid ondersteunt.`,
+    impacts:{ 'Inclusiviteit':5, 'Emissies':2, 'Biodiversiteit':2, 'Betaalbaarheid':1, 'Gezondheid':1 },
+    clashes:[5], clashReason:'Botst met Seizoensproducten (seizoen beperkt beschikbaarheid van vaste vegetarische opties)' },
+  { id:18, cat:'inclusiviteit', icon:'💚', title:'MEER Goedkope maaltijden', color:'#4a148c,#9575cd',
+    desc:'Elke dag een voedzame maaltijd voor minder dan €3,50.',
+    info:`Niet elke medewerker heeft hetzelfde budget. Een dagelijkse voedzame maaltijdoptie voor minder dan €3,50 zorgt dat ook lager betaalde medewerkers volwaardig kunnen mee-eten. Dit versterkt sociale cohesie op de werkvloer en vermindert gezondheidsverschillen. Het kan worden aangeboden via subsidie vanuit het bedrijf of slimme inkoop- en receptuurkeuzes. Eenvoud is de sleutel.`,
+    impacts:{ 'Inclusiviteit':5, 'Betaalbaarheid':3, 'Gezondheid':1, 'Eerlijke keten':-1, 'Emissies':0 },
+    clashes:[7,12], clashReason:'Botst met Fair Trade (hogere inkoopkosten) & Verse producten (hogere bereidingskosten)' },
+];
+
+
+/* ══════════════════════════════════
+   STATE
+══════════════════════════════════ */
+let selectedCards = {}; // catId -> cardId
+let visitedBuildings = new Set();
+let currentBuilding = null;
+
+function getSelectedIds() { return Object.values(selectedCards); }
+
+function getBlockedIds() {
+  const blocked = new Map();
+  getSelectedIds().forEach(id => {
+    const card = CARDS.find(c => c.id === id);
+    if (!card) return;
+    card.clashes.forEach(cid => { if (!blocked.has(cid)) blocked.set(cid, card.clashReason||'Incompatibel'); });
+  });
+  return blocked;
+}
+
+function getScores() {
+  const s = {};
+  THEMES.forEach(t => s[t] = BASELINE);
+  getSelectedIds().forEach(id => {
+    const card = CARDS.find(c => c.id === id);
+    if (!card) return;
+    Object.entries(card.impacts).forEach(([t,v]) => { s[t] = (s[t]||BASELINE) + v; });
+  });
+  return s;
+}
+function clamp(v, lo=0, hi=10) { return Math.max(lo, Math.min(hi, v)); }
+function calcMatch(scores) {
+  let diff = 0;
+  THEMES.forEach(t => diff += Math.abs(clamp(scores[t]) - GOAL[t]));
+  return Math.round((1 - diff / (THEMES.length * 10)) * 100);
+}
+function matchColor(pct) {
+  if (pct >= 80) return '#6ab04c';
+  if (pct >= 60) return '#f0c040';
+  if (pct >= 40) return '#e8613a';
+  return '#b71c1c';
+}
+
+/* ══════════════════════════════════
+   BUILDING RENDERER (SVG-like via HTML)
+══════════════════════════════════ */
+function buildingHTML(b, idx) {
+  const visited = visitedBuildings.has(b.id);
+  const hasCard = !!selectedCards[b.id];
+
+  // make buildings different heights for skyline variety
+  const heights = [220, 180, 260, 175, 215, 200];
+  const widths  = [125, 150, 115, 148, 130, 158];
+  const H = heights[idx], W = widths[idx];
+
+  let roofHtml = '';
+  if (b.roofType === 'tri') {
+    roofHtml = `<div style="width:0;height:0;border-left:${W/2}px solid transparent;border-right:${W/2}px solid transparent;border-bottom:30px solid ${b.roofColor};margin-bottom:-1px"></div>`;
+  } else if (b.roofType === 'dome') {
+    roofHtml = `<div style="width:${W}px;height:30px;background:${b.roofColor};border-radius:${W/2}px ${W/2}px 0 0;margin-bottom:-1px"></div>`;
+  } else {
+    roofHtml = `<div style="width:${W+8}px;height:12px;background:${b.roofColor};border-radius:3px 3px 0 0;margin-bottom:-1px"></div>`;
+  }
+
+  // windows
+  const wCols = Math.floor(W/28);
+  const wRows = Math.floor(H/40);
+  let windowsHtml = '';
+  for (let r=0; r<Math.min(wRows,4); r++) {
+    windowsHtml += `<div style="display:flex;gap:6px;margin-bottom:8px">`;
+    for (let c=0; c<Math.max(wCols,2); c++) {
+      const lit = Math.random() > 0.35;
+      windowsHtml += `<div style="width:20px;height:26px;border-radius:2px 2px 0 0;background:${lit?'#fffde7':'rgba(0,0,0,0.25)'};border:1px solid rgba(0,0,0,0.2);${lit?'box-shadow:0 0 6px 2px rgba(255,236,64,0.4)':''}"></div>`;
+    }
+    windowsHtml += `</div>`;
+  }
+
+  return `
+    <div class="building-wrap ${visited?'visited':''}" onclick="enterBuilding('${b.id}')" title="${b.fullLabel}">
+      <div class="b-check" style="display:${hasCard?'flex':'none'}">✓</div>
+      ${roofHtml}
+      <div class="building-body" style="width:${W}px;height:${H}px;background:${b.bColor};position:relative">
+        <div class="b-banner" style="font-size:26px">${b.icon}</div>
+        <div style="position:absolute;bottom:36px;left:0;right:0;display:flex;flex-direction:column;align-items:center">
+          ${windowsHtml}
+        </div>
+        <div class="b-label" style="position:absolute;bottom:36px;left:0;right:0;text-align:center;padding:0 6px">${hasCard?'✓ klaar':''}</div>
+        <div class="b-door" style="width:32px;height:46px;border-radius:4px 4px 0 0;background:rgba(0,0,0,0.35);border:1px solid rgba(0,0,0,0.3);position:absolute;bottom:0;left:50%;transform:translateX(-50%)"></div>
+      </div>
+      <div class="b-name-tag">${b.icon} ${b.label}</div>
+    </div>`;
+}
+
+function renderStreet() {
+  document.getElementById('buildingsRow').innerHTML =
+    BUILDINGS.map((b,i) => buildingHTML(b,i)).join('');
+  renderTopVisited();
+}
+
+function renderTopVisited() {
+  document.getElementById('topVisited').innerHTML =
+    BUILDINGS.map(b => `<div class="vis-dot ${visitedBuildings.has(b.id)?'done':''}" title="${b.fullLabel}">${b.icon}</div>`).join('');
+}
+
+/* ══════════════════════════════════
+   NAVIGATION
+══════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function enterBuilding(catId) {
+  currentBuilding = catId;
+  visitedBuildings.add(catId);
+  renderInsideScreen(catId);
+  showScreen('insideScreen');
+  renderStreet();
+}
+
+function leaveBuilding() {
+  showScreen('streetScreen');
+  renderStreet();
+  // check if all visited
+  if (visitedBuildings.size === BUILDINGS.length) {
+    setTimeout(() => {
+      const allDone = BUILDINGS.every(b => selectedCards[b.id]);
+      if (allDone) showResults();
+    }, 400);
+  }
+}
+
+function showResults() {
+  renderResults();
+  showScreen('resultsScreen');
+}
+
+function restartGame() {
+  selectedCards = {};
+  visitedBuildings = new Set();
+  currentBuilding = null;
+  renderStreet();
+  showScreen('streetScreen');
+  document.getElementById('welcomeCard').style.display = '';
+}
+
+/* ══════════════════════════════════
+   INSIDE SCREEN
+══════════════════════════════════ */
+function renderInsideScreen(catId) {
+  const b = BUILDINGS.find(x => x.id === catId);
+  const catCards = CARDS.filter(c => c.cat === catId);
+  const blocked  = getBlockedIds();
+  const selCard  = selectedCards[catId];
+
+  document.getElementById('insideHeader').innerHTML = `
+    <div class="inside-icon">${b.icon}</div>
+    <div class="inside-header-text">
+      <h2>${b.fullLabel}</h2>
+      <p>${b.desc} Kies één beleidskaart.</p>
+    </div>
+    <button class="back-btn" onclick="leaveBuilding()">← Terug naar straat</button>`;
+
+  document.getElementById('insideInstruction').textContent =
+    selCard ? `Je hebt al een kaart gekozen. Klik op een andere kaart om van keuze te wisselen.`
+            : `Kies één van de drie beleidskaarten hieronder.`;
+
+  document.getElementById('cardsGrid').innerHTML = catCards.map(card => {
+    const isSel   = selCard === card.id;
+    const isClash = !isSel && blocked.has(card.id);
+    const pills   = Object.entries(card.impacts).map(([t,v]) => {
+      const p = THEME_PILL[t];
+      return `<span class="impact-pill" style="background:${p.bg};color:${p.text}">${v>0?'+':''}${v} ${t}</span>`;
+    }).join('');
+    return `
+      <div class="card ${isSel?'selected':''} ${isClash?'clash':''}"
+           style="background:linear-gradient(160deg,${card.color})"
+           onclick="pickCard('${catId}',${card.id})">
+        <div class="card-badge"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+        <div class="card-hdr"><span class="card-hdr-icon">${card.icon}</span><span class="card-num">#${String(card.id).padStart(2,'0')}</span></div>
+        <div class="card-icon-wrap"><div class="card-big-icon">${card.icon}</div></div>
+        <div class="card-body">
+          <div class="card-title">${card.title}</div>
+          <div class="card-desc">${card.desc}</div>
+          <div class="card-impacts">${pills}</div>
+        </div>
+        ${isClash?`<div class="clash-bar">⚡ ${blocked.get(card.id)||''}</div>`:''}
+      </div>`;
+  }).join('');
+
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.classList.toggle('ready', !!selCard);
+}
+
+function pickCard(catId, cardId) {
+  openCardPopup(catId, cardId);
+}
+
+/* ══════════════════════════════════
+   POLAR CHART
+══════════════════════════════════ */
+let resAnim = null;
+let resCurrent = THEMES.map(() => BASELINE);
+
+function drawPolar(canvas, data, isGoal) {
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  if (!W || !H) return;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  const ctx = canvas.getContext('2d'); ctx.scale(dpr,dpr);
+  const cx=W/2, cy=H/2, maxR=Math.min(W,H)*0.30;
+  const MAX=10, N=THEMES.length, step=(Math.PI*2)/N;
+  const sa = -Math.PI/2 - step/2;
+  const fills = isGoal ? THEME_FILL_G : THEME_FILL;
+
+  for (let r=2;r<=MAX;r+=2) { const rr=maxR*(r/MAX); ctx.beginPath(); ctx.arc(cx,cy,rr,0,Math.PI*2); ctx.strokeStyle='rgba(180,210,180,0.4)'; ctx.lineWidth=0.8; ctx.stroke(); }
+  for (let i=0;i<N;i++) {
+    const a0=sa+i*step, a1=a0+step, r=maxR*(clamp(data[i])/MAX);
+    if (r>1) {
+      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,a0,a1); ctx.closePath();
+      ctx.fillStyle=fills[i]; ctx.fill();
+      if (!isGoal) for (let rr=2;rr<=MAX;rr+=2) { const rrr=maxR*(rr/MAX); if(rrr<r){ctx.beginPath();ctx.arc(cx,cy,rrr,a0,a1);ctx.strokeStyle='rgba(255,255,255,0.6)';ctx.lineWidth=1.2;ctx.stroke();} }
+      ctx.beginPath(); ctx.arc(cx,cy,r,a0,a1); ctx.strokeStyle=isGoal?THEME_COLORS[i]+'88':THEME_COLORS[i]; ctx.lineWidth=isGoal?1:1.8; ctx.stroke();
+    }
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(a1)*maxR,cy+Math.sin(a1)*maxR); ctx.strokeStyle='rgba(180,210,180,0.45)'; ctx.lineWidth=0.7; ctx.stroke();
+  }
+  ctx.beginPath(); ctx.arc(cx,cy,maxR,0,Math.PI*2); ctx.strokeStyle='rgba(150,190,150,0.35)'; ctx.lineWidth=1; ctx.stroke();
+  if (isGoal) { ctx.setLineDash([3,3]); ctx.beginPath(); ctx.arc(cx,cy,maxR,0,Math.PI*2); ctx.strokeStyle='rgba(21,101,192,0.25)'; ctx.lineWidth=1.5; ctx.stroke(); ctx.setLineDash([]); }
+  const ns=Math.max(8,Math.round(maxR*0.1)); ctx.font=`500 ${ns}px DM Sans,sans-serif`; ctx.fillStyle='#9ac09e'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+  for (let r=2;r<=MAX;r+=2) { const rr=maxR*(r/MAX); ctx.fillText(String(r),cx+3,cy-rr+1); }
+  const lr=maxR+maxR*0.35, is=Math.max(14,Math.round(maxR*0.24)); ctx.font=`${is}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+  for (let i=0;i<N;i++) { const m=sa+i*step+step/2; ctx.fillText(THEME_ICONS[i],cx+Math.cos(m)*lr,cy+Math.sin(m)*lr); }
+  ctx.beginPath(); ctx.arc(cx,cy,maxR*0.065,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+}
+
+function animateResult(target) {
+  if (resAnim) cancelAnimationFrame(resAnim);
+  const start=resCurrent.slice(), t0=performance.now(), dur=600;
+  function step(now) {
+    const t=Math.min((now-t0)/dur,1), ease=1-Math.pow(1-t,3);
+    resCurrent=start.map((s,i)=>s+(target[i]-s)*ease);
+    drawPolar(document.getElementById('resultChart'),resCurrent,false);
+    if(t<1) resAnim=requestAnimationFrame(step);
+    else { resCurrent=target.slice(); drawPolar(document.getElementById('resultChart'),resCurrent,false); }
+  }
+  resAnim=requestAnimationFrame(step);
+}
+
+/* ══════════════════════════════════
+   RESULTS
+══════════════════════════════════ */
+function renderResults() {
+  const scores   = getScores();
+  const goalData = THEMES.map(t => GOAL[t]);
+  const resData  = THEMES.map(t => clamp(scores[t]||0));
+  const pct      = calcMatch(scores);
+  const ids      = getSelectedIds();
+
+  // title
+  const tEl = document.getElementById('resultsTitle');
+  const sEl = document.getElementById('resultsSubtitle');
+  if (pct>=80) { tEl.textContent='🎉 Uitstekend resultaat!'; sEl.textContent='Jouw keuzes sluiten nauw aan bij de bedrijfsdoelen.'; }
+  else if (pct>=60) { tEl.textContent='👍 Goed op weg!'; sEl.textContent='Je keuzes komen goed overeen — met nog wat ruimte om te groeien.'; }
+  else if (pct>=40) { tEl.textContent='⚖️ Gemengd resultaat'; sEl.textContent='Je raakt sommige doelen maar wijkt op andere thema\'s sterk af.'; }
+  else { tEl.textContent='🔄 Ver van het doel'; sEl.textContent='Jouw beleidskeuzes wijken sterk af. Ga terug en probeer het opnieuw!'; }
+
+  // draw charts after brief delay (DOM settle)
+  setTimeout(() => {
+    drawPolar(document.getElementById('goalChart'), goalData, true);
+    animateResult(resData);
+    // match bar
+    document.getElementById('matchPct').textContent = pct+'%';
+    document.getElementById('matchPct').style.color = matchColor(pct);
+    document.getElementById('matchFill').style.width = pct+'%';
+    document.getElementById('matchFill').style.background = matchColor(pct);
+  }, 80);
+
+  // legend
+  document.getElementById('rLegend').innerHTML = THEMES.map((t,i)=>
+    `<div class="r-legend-item"><span class="ldot" style="background:${THEME_COLORS[i]}"></span>${THEME_ICONS[i]} ${t}</div>`).join('');
+
+  // picked cards
+  document.getElementById('picksList').innerHTML = ids.length === 0
+    ? '<p style="color:#9ac09e;font-size:13px;font-style:italic">Nog geen kaarten gekozen.</p>'
+    : ids.map(id => {
+        const card = CARDS.find(c=>c.id===id);
+        if (!card) return '';
+        const bld = BUILDINGS.find(b=>b.id===card.cat);
+        const pills = Object.entries(card.impacts).map(([t,v])=>{
+          const p=THEME_PILL[t]; return `<span class="pick-pill" style="background:${p.bg};color:${p.text}">${v>0?'+':''}${v} ${t}</span>`;
+        }).join('');
+        return `<div class="pick-card-full">
+          <div class="pick-stripe" style="background:linear-gradient(180deg,${card.color})"></div>
+          <div class="pick-content">
+            <div class="pick-cat">${bld?.icon} ${bld?.fullLabel}</div>
+            <div class="pick-title">${card.title}</div>
+            <div class="pick-desc">${card.desc}</div>
+            <div class="pick-pills">${pills}</div>
+          </div>
+          <div class="pick-icon">${card.icon}</div>
+        </div>`;
+      }).join('');
+
+  // bars
+  document.getElementById('themeBars').innerHTML = THEMES.map((t,i) => {
+    const val=clamp(scores[t]||0), goal=GOAL[t];
+    return `<div class="th-row">
+      <span class="th-icon">${THEME_ICONS[i]}</span>
+      <span class="th-name">${t}</span>
+      <div class="th-bars">
+        <div class="b-row"><span class="b-tag">Doel</span><div class="b-bg"><div class="b-bar" style="width:${goal*10}%;background:${THEME_COLORS[i]}44"></div></div><span class="b-val" style="color:${THEME_COLORS[i]}88">${goal}</span></div>
+        <div class="b-row"><span class="b-tag">Jij</span><div class="b-bg"><div class="b-bar" id="rb${i}" style="width:0%;background:${THEME_COLORS[i]}"></div></div><span class="b-val">${val}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+  setTimeout(()=>{ THEMES.forEach((_,i)=>{ const b=document.getElementById('rb'+i); if(b) b.style.width=clamp(getScores()[THEMES[i]]||0)*10+'%'; }); },350);
+
+  // resize observers for charts
+  const goC=document.getElementById('goalChart');
+  const reC=document.getElementById('resultChart');
+  new ResizeObserver(()=>drawPolar(goC,goalData,true)).observe(goC.parentElement);
+  new ResizeObserver(()=>drawPolar(reC,resCurrent,false)).observe(reC.parentElement);
+}
+
+/* ══════════════════════════════════
+   CARD INFO POPUP
+══════════════════════════════════ */
+let popupCatId = null;
+let popupCardId = null;
+
+function openCardPopup(catId, cardId) {
+  const card = CARDS.find(c => c.id === cardId);
+  const bld  = BUILDINGS.find(b => b.id === catId);
+  if (!card) return;
+  popupCatId  = catId;
+  popupCardId = cardId;
+
+  const pills = Object.entries(card.impacts).map(([t,v]) => {
+    const p = THEME_PILL[t];
+    return `<span class="impact-pill" style="background:${p.bg};color:${p.text};font-size:11px;padding:3px 8px;border-radius:6px;font-weight:700">${v>0?'+':''}${v} ${t}</span>`;
+  }).join('');
+
+  // extract first colour from gradient for icon bg
+  const bgColor = card.color.split(',')[0];
+
+  document.getElementById('popupContent').innerHTML = `
+    <div class="popup-card-header">
+      <div class="popup-big-icon" style="background:linear-gradient(135deg,${card.color})">${card.icon}</div>
+      <div class="popup-header-text">
+        <div class="popup-cat">${bld?.icon} ${bld?.fullLabel}</div>
+        <div class="popup-title">${card.title}</div>
+        <div class="popup-desc">${card.desc}</div>
+      </div>
+      <button class="popup-close" onclick="closePopup()">✕</button>
+    </div>
+    <div class="popup-info">${card.info}</div>
+    <div class="popup-impacts">${pills}</div>
+    <div class="popup-actions">
+      <button class="popup-btn-back" onclick="closePopup()">← Terug</button>
+      <button class="popup-btn-claim" onclick="claimCard()">✓ Kies deze kaart →</button>
+    </div>`;
+
+  document.getElementById('popupOverlay').classList.add('open');
+}
+
+function closePopup() {
+  document.getElementById('popupOverlay').classList.remove('open');
+  popupCatId = null; popupCardId = null;
+}
+
+function claimCard() {
+  if (!popupCatId || !popupCardId) return;
+  selectedCards[popupCatId] = popupCardId;
+  closePopup();
+  // go back to street with a brief delay for the popup close animation
+  setTimeout(() => {
+    leaveBuilding();
+  }, 250);
+}
+
+// close on overlay click
+document.getElementById('popupOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closePopup();
+});
+
+/* ══════════════════════════════════
+   INIT
+══════════════════════════════════ */
+renderStreet();
+</script>
+</body>
+</html>
