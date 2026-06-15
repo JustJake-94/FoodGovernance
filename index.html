@@ -48,101 +48,72 @@ body { background: var(--sky1); }
 .screen { position: fixed; inset: 52px 0 0 0; display: none; }
 .screen.active { display: flex; }
 
-/* ══ STREET SCENE ══ */
-#streetScreen {
-  flex-direction: column; justify-content: flex-end;
-  background: linear-gradient(180deg, #b8e4f0 0%, #dff0f8 55%, #86efac 55%, #6ee7a0 60%);
-  overflow: hidden;
+/* ══ IMAGE BACKGROUND SCREENS ══ */
+.bg-screen {
+  background: #b8e4f0;
+  overflow: auto;
+  justify-content: center;
 }
-
-/* clouds */
-.cloud {
-  position: absolute; border-radius: 50px;
-  background: rgba(255,255,255,0.75);
-  animation: drift linear infinite;
+.bg-screen-inner {
+  position: relative;
+  width: 100%;
+  align-self: flex-start;
 }
-@keyframes drift { from { transform: translateX(-200px); } to { transform: translateX(110vw); } }
-
-/* buildings row */
-.buildings-row {
-  position: absolute; bottom: 130px; left: 0; right: 0;
-  display: flex; justify-content: center; align-items: flex-end; gap: 18px;
-  padding: 0 2rem;
+.bg-screen-inner img {
+  width: 100%; height: auto; display: block;
+  user-select: none; pointer-events: none;
 }
-
-.building-wrap {
-  display: flex; flex-direction: column; align-items: center; cursor: pointer;
-  transition: transform 0.2s; position: relative;
+.hit-area {
+  position: absolute;
+  cursor: pointer;
+  border-radius: 14px;
+  transition: background 0.15s, box-shadow 0.15s;
 }
-.building-wrap:hover .building-body { filter: brightness(1.08); }
-.building-wrap:hover { transform: translateY(-6px); }
-.building-wrap.visited .building-body { filter: saturate(0.55) brightness(0.85); }
-.building-wrap.visited .b-banner { opacity: 0.5; }
-
-.building-body {
-  border-radius: 4px 4px 0 0; position: relative;
-  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-  transition: filter 0.2s;
-  box-shadow: 4px 0 0 rgba(0,0,0,0.08) inset, -4px 0 0 rgba(0,0,0,0.05) inset;
+.hit-area:hover {
+  background: rgba(255,255,255,0.18);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.5);
 }
-
-/* roof styles per building */
-.roof-flat  { width: 100%; height: 10px; background: rgba(0,0,0,0.15); border-radius: 4px 4px 0 0; }
-.roof-tri   { width: 0; height: 0; border-left: solid transparent; border-right: solid transparent; border-bottom: solid; }
-.roof-dome  { width: 100%; border-radius: 50% 50% 0 0; }
-
-.windows-row { display: flex; gap: 5px; margin-bottom: 10px; }
-.win {
-  width: 14px; height: 18px; border-radius: 2px 2px 0 0;
-  background: rgba(255,255,220,0.7); border: 1px solid rgba(0,0,0,0.15);
-}
-.win.lit { background: #fffde7; box-shadow: 0 0 6px 2px rgba(255,236,64,0.5); }
-
-.b-door {
-  width: 22px; height: 32px; border-radius: 3px 3px 0 0;
-  background: rgba(0,0,0,0.3); margin-bottom: 0; border: 1px solid rgba(0,0,0,0.2);
-}
-
-.b-label {
-  font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.4); text-align: center;
-  max-width: 90px; line-height: 1.2;
-}
-
-.b-banner {
-  position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
-  background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.35);
-  border-radius: 8px; padding: 3px 7px; font-size: 18px; line-height: 1;
-}
-
-.b-check {
-  position: absolute; top: -12px; right: -8px;
-  width: 22px; height: 22px; background: var(--green-mid); border-radius: 50%;
+.hit-check {
+  position: absolute; top: 10px; right: 10px;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: #2e7d32; color: #fff;
   display: none; align-items: center; justify-content: center;
-  font-size: 12px; color: #fff; box-shadow: 0 2px 6px rgba(46,125,50,0.4);
+  font-size: 17px; font-weight: 700;
+  box-shadow: 0 2px 10px rgba(46,125,50,0.45);
+  pointer-events: none;
 }
-.building-wrap.visited .b-check { /* controlled by inline style */ }
+.building-hit.has-card .hit-check { display: flex; }
 
-.b-name-tag {
-  font-size: 12px; font-weight: 700; color: var(--green-dark);
-  background: rgba(255,255,255,0.85); border-radius: 6px;
-  padding: 3px 10px; margin-top: 6px; text-align: center;
+/* ══ BACKGROUND IMAGE FRAME + HOTSPOTS ══ */
+.bg-frame {
+  position: relative;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
 }
+.hotspot {
+  position: absolute;
+  cursor: pointer;
+  background: rgba(255,255,255,0);
+  transition: background 0.15s, box-shadow 0.15s;
+  border-radius: 14px;
+}
+.hotspot:hover {
+  background: rgba(255,255,255,0.16);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.35) inset;
+}
+.hotspot-check {
+  position: absolute; top: 6px; right: 6px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--green-mid); color: #fff;
+  display: none; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.building-hotspot.visited .hotspot-check { display: flex; }
 
-/* road */
-.road {
-  position: absolute; bottom: 0; left: 0; right: 0; height: 110px;
-  background: #6b7280;
-}
-.road-line {
-  position: absolute; top: 50%; left: 0; right: 0;
-  height: 4px; background: repeating-linear-gradient(90deg, #e5e7eb 0px, #e5e7eb 40px, transparent 40px, transparent 80px);
-  transform: translateY(-50%);
-}
-.pavement {
-  position: absolute; top: 0; left: 0; right: 0; height: 18px;
-  background: #9ca3af; border-top: 2px solid #d1d5db;
-}
+#streetScreen { align-items: center; justify-content: center; background: #b8e4f0; overflow: hidden; }
 
 /* ══ ENTER ANIMATION ══ */
 .enter-overlay {
@@ -257,10 +228,73 @@ body { background: var(--sky1); }
 
 .r-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 0.75rem; }
 .r-legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #6b8870; }
+
+.personal-summary {
+  margin-top: 1.25rem;
+  border-top: 1px solid rgba(46,125,50,0.12);
+  padding-top: 1rem;
+}
+.personal-summary-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px; font-weight: 700; color: #1b3a20;
+  margin-bottom: 0.75rem; display: flex; align-items: center; gap: 7px;
+}
+.personal-summary-cards {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.summary-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: #f8fdf8; border-radius: 10px;
+  border: 1px solid rgba(46,125,50,0.1);
+  padding: 10px 12px;
+}
+.summary-icon { font-size: 20px; flex-shrink: 0; line-height: 1.3; }
+.summary-text { flex: 1; }
+.summary-card-title { font-size: 11px; font-weight: 700; color: #2e7d32; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+.summary-card-personal { font-size: 12.5px; color: #374151; line-height: 1.55; }
 .ldot { width: 7px; height: 7px; border-radius: 50%; }
 
 /* picks */
-.picks-col { display: flex; flex-direction: column; gap: 0.75rem; }
+.picks-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 0.75rem;
+}
+.result-card {
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+  display: flex; flex-direction: column;
+  overflow: hidden; aspect-ratio: 2.5 / 3.5;
+  border: 1.5px solid rgba(255,255,255,0.2);
+}
+.result-card-hdr {
+  padding: 8px 9px 5px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.result-card-icon {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; padding: 4px 0 2px; flex-shrink: 0;
+  background: rgba(255,255,255,0.15);
+}
+.result-card-body {
+  background: #fff; padding: 7px 9px 6px;
+  flex: 1; display: flex; flex-direction: column; gap: 4px; min-height: 0;
+}
+.result-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 12px; font-weight: 700; color: #1b3a20;
+  line-height: 1.2; text-align: center;
+}
+.result-card-desc {
+  font-size: 9px; color: #6b8870; line-height: 1.3; text-align: center;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.result-card-impacts {
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: center; align-items: center; gap: 2px;
+}
 .pick-card-full { background: #fff; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 1px 6px rgba(0,0,0,0.06); display: flex; overflow: hidden; }
 .pick-stripe { width: 7px; flex-shrink: 0; }
 .pick-content { padding: 10px 12px; flex: 1; }
@@ -342,6 +376,22 @@ body { background: var(--sky1); }
   border-top: 1px solid #f3f4f6; padding-top: 1rem;
 }
 
+.popup-personal {
+  margin: 0 1.5rem 1rem;
+  background: linear-gradient(135deg, #e8f5e9, #f1f8f2);
+  border: 1.5px solid rgba(46,125,50,0.2);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+.popup-personal-label {
+  font-size: 12px; font-weight: 800; color: #2e7d32;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  margin-bottom: 0.5rem;
+}
+.popup-personal-text {
+  font-size: 13.5px; color: #1b3a20; line-height: 1.7;
+}
+
 .popup-impacts {
   padding: 0.75rem 1.5rem;
   display: flex; flex-wrap: wrap; gap: 5px;
@@ -369,7 +419,6 @@ body { background: var(--sky1); }
 .popup-btn-claim:hover { background: #1b5e20; transform: translateY(-1px); }
 
 @media (max-width: 800px) {
-  .buildings-row { gap: 6px; padding: 0 0.5rem; }
   .cards-grid { grid-template-columns: 1fr 1fr; }
   .results-body { grid-template-columns: 1fr; }
   .dual-charts { grid-template-columns: 1fr 1fr; }
@@ -377,37 +426,55 @@ body { background: var(--sky1); }
 @media (max-width: 500px) {
   .cards-grid { grid-template-columns: 1fr; }
 }
+
+/* ══ START SCREEN ══ */
+#startScreen {
+  background: #b8e4f0;
+  align-items: center; justify-content: center;
+  overflow: hidden;
+}
 </style>
 </head>
 <body>
 
 <!-- TOPBAR -->
-<div class="topbar">
+<div class="topbar" id="topbar" style="display:none">
   <div class="top-logo">🌱 Food Governance</div>
   <div class="top-visited" id="topVisited"></div>
   <button class="top-chart-btn" onclick="showResults()">📊 Bekijk grafiek</button>
 </div>
 
+<!-- START SCREEN -->
+<div class="screen active bg-screen" id="startScreen">
+  <div class="bg-screen-inner">
+    <img src="images/start-bg.png" alt="Food Governance start" draggable="false">
+    <div class="hit-area" style="left:11.4%;top:69.5%;width:17.8%;height:8.6%" onclick="startGame()" title="Start"></div>
+  </div>
+</div>
+
 <!-- STREET SCREEN -->
-<div class="screen active" id="streetScreen">
-  <!-- clouds -->
-  <div class="cloud" style="width:120px;height:40px;top:14%;left:-10%;animation-duration:28s;animation-delay:0s;opacity:0.7"></div>
-  <div class="cloud" style="width:80px;height:28px;top:22%;left:30%;animation-duration:38s;animation-delay:6s;opacity:0.55"></div>
-  <div class="cloud" style="width:160px;height:50px;top:10%;left:60%;animation-duration:32s;animation-delay:12s;opacity:0.65"></div>
-  <div class="cloud" style="width:90px;height:30px;top:30%;left:80%;animation-duration:24s;animation-delay:4s;opacity:0.5"></div>
+<div class="screen bg-screen" id="streetScreen">
+  <div class="bg-screen-inner">
+    <img src="images/street-bg.png" alt="Food Governance straat" draggable="false">
 
-  <!-- sun -->
-  <div style="position:absolute;top:12%;right:8%;width:56px;height:56px;background:radial-gradient(circle,#fffde7,#fdd835 60%,transparent 70%);border-radius:50%;box-shadow:0 0 40px 20px rgba(253,216,53,0.25)"></div>
-
-  <div class="buildings-row" id="buildingsRow"></div>
-  <div class="road"><div class="pavement"></div><div class="road-line"></div></div>
-
-  <!-- welcome card -->
-  <div id="welcomeCard" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);background:rgba(255,255,255,0.95);border-radius:20px;padding:2rem 2.5rem;max-width:420px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.15);backdrop-filter:blur(8px);">
-    <div style="font-size:40px;margin-bottom:0.75rem">🏘️</div>
-    <h2 style="font-family:'Playfair Display',serif;font-size:22px;color:#1b3a20;margin-bottom:0.5rem">Welkom in de Food Governance straat</h2>
-    <p style="font-size:13px;color:#6b8870;line-height:1.6;margin-bottom:1.5rem">Bezoek alle zes gebouwen in jouw eigen volgorde. In elk gebouw kies je één beleidskaart. Na alle gebouwen zie je hoe jouw keuzes passen bij het bedrijfsdoel.</p>
-    <button onclick="document.getElementById('welcomeCard').style.display='none'" style="background:#2e7d32;color:#fff;border:none;border-radius:50px;padding:11px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 4px 14px rgba(46,125,50,0.35)">Start je rondgang →</button>
+    <div class="hit-area building-hit" data-cat="gezondheid" style="left:0%;top:22%;width:19%;height:78%" onclick="enterBuilding('gezondheid')" title="Gezondheid">
+      <div class="hit-check">✓</div>
+    </div>
+    <div class="hit-area building-hit" data-cat="eerlijkeketen" style="left:17%;top:27%;width:16%;height:73%" onclick="enterBuilding('eerlijkeketen')" title="Eerlijke keten">
+      <div class="hit-check">✓</div>
+    </div>
+    <div class="hit-area building-hit" data-cat="inclusiviteit" style="left:32%;top:24%;width:17%;height:76%" onclick="enterBuilding('inclusiviteit')" title="Inclusiviteit">
+      <div class="hit-check">✓</div>
+    </div>
+    <div class="hit-area building-hit" data-cat="biodiversiteit" style="left:48%;top:0%;width:20%;height:100%" onclick="enterBuilding('biodiversiteit')" title="Biodiversiteit">
+      <div class="hit-check">✓</div>
+    </div>
+    <div class="hit-area building-hit" data-cat="emissies" style="left:66%;top:27%;width:18%;height:73%" onclick="enterBuilding('emissies')" title="Emissies">
+      <div class="hit-check">✓</div>
+    </div>
+    <div class="hit-area building-hit" data-cat="betaalbaarheid" style="left:83%;top:21%;width:17%;height:79%" onclick="enterBuilding('betaalbaarheid')" title="Betaalbaarheid">
+      <div class="hit-check">✓</div>
+    </div>
   </div>
 </div>
 
@@ -447,11 +514,14 @@ body { background: var(--sky1); }
         <div class="match-track"><div class="match-fill" id="matchFill" style="width:0%"></div></div>
       </div>
       <div class="r-legend" id="rLegend"></div>
+      <div style="margin-top:1.25rem;border-top:1px solid rgba(0,0,0,0.06);padding-top:1rem;">
+        <h2 style="margin-bottom:0.75rem">Gekozen kaarten</h2>
+        <div class="picks-col" id="picksList"></div>
+      </div>
     </div>
 
     <div class="panel-box">
-      <h2>Gekozen kaarten</h2>
-      <div class="picks-col" id="picksList"></div>
+      <div class="personal-summary" id="personalSummary"></div>
     </div>
 
     <div class="panel-box bars-full">
@@ -504,105 +574,142 @@ const BUILDINGS = [
 ];
 
 const CARDS = [
+
   // ── EMISSIES ──
   { id:1, cat:'emissies', icon:'📍', title:'MEER Lokaal', color:'#1565c0,#1e88e5',
     desc:'Inkoop van ingrediënten zo lokaal mogelijk organiseren.',
-    info:`Lokale inkoop vermindert transportemissies aanzienlijk. Korte ketens betekenen minder vrachtwagentransport over lange afstanden. Nederland heeft een rijke regio-agrarische sector die veel producten kan leveren. Lokaal inkopen versterkt ook de regionale economie en maakt de keten transparanter. Een bijkomend voordeel is dat seizoensproducten automatisch centraler komen te staan, wat de biodiversiteit ten goede komt.`,
+    info:`Lokale inkoop vermindert transportemissies aanzienlijk. Korte ketens betekenen minder vrachtwagentransport over lange afstanden. Nederland heeft een rijke regio-agrarische sector die veel producten kan leveren. Lokaal inkopen versterkt ook de regionale economie en maakt de keten transparanter. Een bijkomend voordeel is dat seizoensproducten automatisch centraler komen te staan, wat de biodiversiteit ten goede komt.
+
+🧑 Wat betekent dit voor jou? Je eet maaltijden waarvan je weet waar ze vandaan komen — van boeren in de buurt. Je proeft het verschil: lokale producten zijn vaak verser en smaakvoller. Je kantine voelt minder anoniem en meer verbonden met de regio waar je werkt. En je draagt met elke hap bij aan een kleinere CO₂-voetafdruk.`,
     impacts:{ 'Emissies':5, 'Biodiversiteit':2, 'Eerlijke keten':2, 'Betaalbaarheid':1, 'Gezondheid':-1 },
     clashes:[7,14], clashReason:'Botst met Fair Trade (lokaal vs. globaal) & Grotere volumes (vaste leveranciers)' },
   { id:2, cat:'emissies', icon:'⚡', title:'MEER Groene energie', color:'#0d47a1,#42a5f5',
     desc:'Productie en bereiding met 100% hernieuwbare energie.',
-    info:`De energieverbruik van keukens en cateringbedrijven is aanzienlijk. Overstappen op groene stroom en zonnepanelen reduceert de CO₂-voetafdruk van de bereiding drastisch. Warmtepompen en inductiekoken verlagen het gasverbruik. Investering in groene energie heeft hogere opstartkosten maar levert op lange termijn kostenbesparing op. Het is ook een zichtbaar signaal naar medewerkers en klanten.`,
+    info:`De energieverbruik van keukens en cateringbedrijven is aanzienlijk. Overstappen op groene stroom en zonnepanelen reduceert de CO₂-voetafdruk van de bereiding drastisch. Warmtepompen en inductiekoken verlagen het gasverbruik. Investering in groene energie heeft hogere opstartkosten maar levert op lange termijn kostenbesparing op. Het is ook een zichtbaar signaal naar medewerkers en klanten.
+
+🧑 Wat betekent dit voor jou? Je eten wordt bereid met schone energie — de keuken draait op zon en wind. Dat merk je misschien niet direct op je bord, maar wel in hoe het voelt: je bedrijf neemt klimaat serieus, ook achter de schermen. Je kunt trots vertellen dat zelfs de bereiding van je lunch duurzaam is.`,
     impacts:{ 'Emissies':5, 'Betaalbaarheid':-2, 'Biodiversiteit':1, 'Gezondheid':0 },
     clashes:[14,15], clashReason:'Botst met Grotere volumes & Eenvoudig assortiment (investeringsbudget onder druk)' },
   { id:3, cat:'emissies', icon:'🥦', title:'MEER Plantaardig', color:'#1b5e20,#66bb6a',
     desc:'Plantaardige maaltijden als standaard in het aanbod.',
-    info:`De productie van dierlijke eiwitten stoot 5 tot 10 keer meer CO₂ uit dan plantaardige alternatieven. Door plantaardig als standaard te maken daalt de klimaatimpact van elke maaltijd fors. Onderzoek toont dat "default nudging" — plantaardig als standaard aanbieden — de consumptie ervan met 30–50% verhoogt. Dit vraagt aandacht voor smaak en communicatie richting medewerkers.`,
+    info:`De productie van dierlijke eiwitten stoot 5 tot 10 keer meer CO₂ uit dan plantaardige alternatieven. Door plantaardig als standaard te maken daalt de klimaatimpact van elke maaltijd fors. Onderzoek toont dat "default nudging" — plantaardig als standaard aanbieden — de consumptie ervan met 30–50% verhoogt. Dit vraagt aandacht voor smaak en communicatie richting medewerkers.
+
+🧑 Wat betekent dit voor jou? Je standaardlunch is plantaardig — lekker, voedzaam en goed voor het klimaat. Wil je toch vlees? Dat kan, maar je vraagt er actief om. Veel mensen ontdekken zo gerechten die ze anders nooit hadden geprobeerd. Je voelt je energieker na de lunch en draagt bij aan een van de grootste klimaatwinsten die er te behalen valt.`,
     impacts:{ 'Emissies':5, 'Biodiversiteit':3, 'Gezondheid':2, 'Inclusiviteit':-1, 'Betaalbaarheid':1 },
     clashes:[16,18], clashReason:'Botst met Halal & Koosjer (aparte bereiding nodig) & Goedkope maaltijden (kostprijs stijgt)' },
 
   // ── BIODIVERSITEIT ──
   { id:4, cat:'biodiversiteit', icon:'🦋', title:'MEER NatuurInclusiviteit', color:'#2e7d32,#4caf50',
     desc:'Leveranciers kiezen die natuur-inclusief boeren.',
-    info:`Natuur-inclusieve landbouw combineert voedselproductie met herstel van ecosystemen. Boeren laten bloemenranden staan, vermijden pesticiden en herstellen bodemleven. Door actief te kiezen voor zulke leveranciers geef je als afnemer een marktsignaal. Dit vergt soms hogere inkoopprijs maar draagt bij aan structurele verbetering van biodiversiteit in het landschap rondom productielocaties.`,
+    info:`Natuur-inclusieve landbouw combineert voedselproductie met herstel van ecosystemen. Boeren laten bloemenranden staan, vermijden pesticiden en herstellen bodemleven. Door actief te kiezen voor zulke leveranciers geef je als afnemer een marktsignaal. Dit vergt soms hogere inkoopprijs maar draagt bij aan structurele verbetering van biodiversiteit in het landschap rondom productielocaties.
+
+🧑 Wat betekent dit voor jou? Jouw keuze op het werk helpt letterlijk vlinders, bijen en vogels in het boerenland overleven. De producten op je bord komen van boeren die natuur en voedsel combineren. Je draagt bij aan een zichtbare verandering in het landschap — elke maaltijd is een stem voor een gezonder ecosysteem.`,
     impacts:{ 'Biodiversiteit':5, 'Emissies':2, 'Gezondheid':1, 'Betaalbaarheid':-2, 'Eerlijke keten':1 },
     clashes:[14,15], clashReason:'Botst met Grotere volumes & Eenvoudig assortiment (vereist diverse kleine leveranciers)' },
   { id:5, cat:'biodiversiteit', icon:'🍂', title:'MEER Seizoensproducten', color:'#388e3c,#81c784',
     desc:'Menuaanbod volledig afgestemd op wat het seizoen biedt.',
-    info:`Seizoensgebonden eten vermindert de behoefte aan energie-intensieve kassen en lange transportroutes. Seizoensgroenten zijn doorgaans ook rijker aan voedingsstoffen omdat ze op het juiste moment geoogst worden. Het vraagt flexibiliteit in de keuken en communicatie naar medewerkers, maar creëert ook variatie en verbondenheid met de natuur. Lokale boeren profiteren direct van seizoensinkoop.`,
+    info:`Seizoensgebonden eten vermindert de behoefte aan energie-intensieve kassen en lange transportroutes. Seizoensgroenten zijn doorgaans ook rijker aan voedingsstoffen omdat ze op het juiste moment geoogst worden. Het vraagt flexibiliteit in de keuken en communicatie naar medewerkers, maar creëert ook variatie en verbondenheid met de natuur. Lokale boeren profiteren direct van seizoensinkoop.
+
+🧑 Wat betekent dit voor jou? Je menu verandert met de seizoenen — asperges in de lente, tomaten in de zomer, pompoen in de herfst. Je raakt opnieuw verbonden met het ritme van de natuur. Geen waterige januaritomaten meer: alles wat je eet is op zijn best. Veel mensen ontdekken zo groenten die ze thuis ook vaker gaan kopen.`,
     impacts:{ 'Biodiversiteit':5, 'Emissies':2, 'Gezondheid':2, 'Betaalbaarheid':1, 'Inclusiviteit':-1 },
     clashes:[15,17], clashReason:'Botst met Eenvoudig assortiment (wisselend menu) & Vegetarische alternatieven (seizoen beperkt opties)' },
   { id:6, cat:'biodiversiteit', icon:'🌾', title:'MEER Variatie in gewassen', color:'#1b5e20,#a5d6a7',
     desc:'Gebruik van diverse en vergeten granen, peulvruchten en groenten.',
-    info:`Monoteelt domineert de moderne landbouw: 75% van ons voedsel komt van slechts 12 gewassen. Het actief inkopen van vergeten groenten, oude graanrassen en diverse peulvruchten stimuleert boeren om meer te diversifiëren. Dit verbetert de bodemgezondheid, verlaagt ziektedruk en vergroot de veerkracht van het voedselsysteem. Bijkomend voordeel: unieke smaken en interessante menusamenstelling.`,
+    info:`Monoteelt domineert de moderne landbouw: 75% van ons voedsel komt van slechts 12 gewassen. Het actief inkopen van vergeten groenten, oude graanrassen en diverse peulvruchten stimuleert boeren om meer te diversifiëren. Dit verbetert de bodemgezondheid, verlaagt ziektedruk en vergroot de veerkracht van het voedselsysteem. Bijkomend voordeel: unieke smaken en interessante menusamenstelling.
+
+🧑 Wat betekent dit voor jou? Je ontdekt smaken die je nog nooit hebt geproefd — zwarte linzen, oud-Hollandse knolgroenten, kleurrijke heritage-tomaten. Je lunch wordt een culinaire ontdekking. En je weet: door dit te eten help je gewassen te redden die anders zouden verdwijnen. Een rijker bord, een rijkere planeet.`,
     impacts:{ 'Biodiversiteit':5, 'Gezondheid':2, 'Eerlijke keten':2, 'Betaalbaarheid':-1, 'Emissies':1 },
     clashes:[15], clashReason:'Botst met Eenvoudig assortiment (meer ingrediënten = complexer)' },
 
   // ── EERLIJKE KETEN ──
   { id:7, cat:'eerlijkeketen', icon:'🌍', title:'MEER Fair Trade', color:'#c2185b,#f48fb1',
     desc:'Alle tropische ingrediënten met Fairtrade-keurmerk.',
-    info:`Fairtrade garandeert boeren in lage-inkomenslanden een minimumprijs en toegang tot premies voor gemeenschappelijke projecten zoals scholen en ziekenhuizen. Het systeem heeft bewezen impact in cacaoboeren-gemeenschappen in West-Afrika en koffieboeren in Latijns-Amerika. Fairtrade-producten kosten iets meer maar de meerprijs gaat direct naar de producent.`,
+    info:`Fairtrade garandeert boeren in lage-inkomenslanden een minimumprijs en toegang tot premies voor gemeenschappelijke projecten zoals scholen en ziekenhuizen. Het systeem heeft bewezen impact in cacaoboeren-gemeenschappen in West-Afrika en koffieboeren in Latijns-Amerika. Fairtrade-producten kosten iets meer maar de meerprijs gaat direct naar de producent.
+
+🧑 Wat betekent dit voor jou? Je koffie, thee en chocolade in de kantine zijn Fairtrade. Dat betekent dat de boer die jouw koffie teelde een eerlijke prijs kreeg — genoeg om zijn kinderen naar school te sturen. Jouw dagelijkse kopje koffie heeft nu een verhaal, en dat verhaal is eerlijk.`,
     impacts:{ 'Eerlijke keten':5, 'Inclusiviteit':1, 'Betaalbaarheid':-2, 'Emissies':-1, 'Gezondheid':1 },
     clashes:[1,18], clashReason:'Botst met Lokaal (lokaal vs. globaal) & Goedkope maaltijden (hogere inkoopprijs)' },
   { id:8, cat:'eerlijkeketen', icon:'🤲', title:'MEER Samenwerking met producenten', color:'#ad1457,#ec407a',
     desc:'Directe langetermijnrelaties met boeren en producenten.',
-    info:`Directe samenwerking met producenten — zonder tussenpersonen — geeft boeren meer zekerheid en een eerlijker prijs. Voor het bedrijf betekent het meer grip op kwaliteit en herkomst. Langdurige contracten geven boeren de ruimte om te investeren in duurzamere productiemethoden. Dit model wordt steeds vaker toegepast door vooruitstrevende cateraars in Nederland.`,
+    info:`Directe samenwerking met producenten — zonder tussenpersonen — geeft boeren meer zekerheid en een eerlijker prijs. Voor het bedrijf betekent het meer grip op kwaliteit en herkomst. Langdurige contracten geven boeren de ruimte om te investeren in duurzamere productiemethoden. Dit model wordt steeds vaker toegepast door vooruitstrevende cateraars in Nederland.
+
+🧑 Wat betekent dit voor jou? De boer die jouw groenten verbouwt kent jouw bedrijf bij naam. Soms staan er verhalen op het menu: 'Deze wortels komen van familie Jansen in Zeeland.' Dat maakt eten persoonlijk. Je voelt de verbinding tussen jouw lunch en de mensen die hem mogelijk maken.`,
     impacts:{ 'Eerlijke keten':5, 'Biodiversiteit':2, 'Betaalbaarheid':-1, 'Gezondheid':1, 'Emissies':1 },
     clashes:[14], clashReason:'Botst met Grotere volumes inkopen (coöperatieve inkoop doorbreekt directe relaties)' },
   { id:9, cat:'eerlijkeketen', icon:'📲', title:'MEER Transparante Herkomst', color:'#880e4f,#ce93d8',
     desc:'QR-code met volledige herkomstinformatie op elk product.',
-    info:`Consumenten en medewerkers willen steeds vaker weten waar hun eten vandaan komt. Een QR-code op verpakking of menukaart die doorlinkt naar herkomstinformatie bouwt vertrouwen op. Blockchain-technologie maakt het mogelijk om van elk ingrediënt exact de reis te traceren. Bedrijven die dit inzetten zien hogere betrokkenheid en waardering van medewerkers voor duurzaam beleid.`,
+    info:`Consumenten en medewerkers willen steeds vaker weten waar hun eten vandaan komt. Een QR-code op verpakking of menukaart die doorlinkt naar herkomstinformatie bouwt vertrouwen op. Blockchain-technologie maakt het mogelijk om van elk ingrediënt exact de reis te traceren. Bedrijven die dit inzetten zien hogere betrokkenheid en waardering van medewerkers voor duurzaam beleid.
+
+🧑 Wat betekent dit voor jou? Scan de QR-code bij je lunch en zie direct: welk land, welke boer, hoe ver het gereisd heeft. Je wordt niet meer in het duister gelaten over wat je eet. Dat geeft rust en vertrouwen. Je maakt bewustere keuzes — niet omdat het moet, maar omdat je het weet.`,
     impacts:{ 'Eerlijke keten':5, 'Inclusiviteit':2, 'Betaalbaarheid':-1, 'Emissies':0, 'Gezondheid':1 },
     clashes:[15], clashReason:'Botst met Eenvoudig assortiment (transparantie vereist meer data per product)' },
 
   // ── GEZONDHEID ──
   { id:10, cat:'gezondheid', icon:'🍽️', title:'MEER Kleinere porties', color:'#b71c1c,#ef5350',
     desc:'Standaard kleinere porties met optie voor aanvulling.',
-    info:`Overconsumptie is een groot gezondheidsprobleem. Kleinere standaardporties verminderen calorie-inname zonder dat medewerkers iets hoeven te weigeren — ze kunnen altijd bijhalen. Dit principe heet "portion size nudging" en is wetenschappelijk bewezen effectief. Bijkomend voordeel: minder voedselverspilling en lagere inkoopkosten. Communicatie over de reden vergroot acceptatie.`,
+    info:`Overconsumptie is een groot gezondheidsprobleem. Kleinere standaardporties verminderen calorie-inname zonder dat medewerkers iets hoeven te weigeren — ze kunnen altijd bijhalen. Dit principe heet "portion size nudging" en is wetenschappelijk bewezen effectief. Bijkomend voordeel: minder voedselverspilling en lagere inkoopkosten. Communicatie over de reden vergroot acceptatie.
+
+🧑 Wat betekent dit voor jou? Je krijgt een kleinere portie — maar je kunt altijd meer pakken. In de praktijk blijkt dat de meeste mensen genoeg hebben aan de kleinere portie en zich daarna energieker voelen. Geen after-lunch dip meer. Je eet precies genoeg, verspilt minder, en je lichaam bedankt je in de middag.`,
     impacts:{ 'Gezondheid':5, 'Betaalbaarheid':2, 'Emissies':1, 'Biodiversiteit':1, 'Inclusiviteit':-1 },
     clashes:[18], clashReason:'Botst met Goedkope maaltijden (kleine porties voelen minder waardevol voor lager budget)' },
   { id:11, cat:'gezondheid', icon:'🥕', title:'MEER Fruit en groente', color:'#c62828,#ff7043',
     desc:'Minimaal 50% van elke maaltijd bestaat uit groenten en fruit.',
-    info:`De Schijf van Vijf adviseert 250 gram groenten en 2 stuks fruit per dag. In de praktijk halen de meeste Nederlanders dit niet. Door fruit en groenten centraal te stellen in het cateringaanbod maak je gezond eten de makkelijke keuze. Verse groenten zijn ook goedkoper dan vleescomponenten, wat de betaalbaarheid ten goede komt. Kleurrijke borden verhogen ook de eetbeleving.`,
+    info:`De Schijf van Vijf adviseert 250 gram groenten en 2 stuks fruit per dag. In de praktijk halen de meeste Nederlanders dit niet. Door fruit en groenten centraal te stellen in het cateringaanbod maak je gezond eten de makkelijke keuze. Verse groenten zijn ook goedkoper dan vleescomponenten, wat de betaalbaarheid ten goede komt. Kleurrijke borden verhogen ook de eetbeleving.
+
+🧑 Wat betekent dit voor jou? De helft van je bord is groenten en fruit — kleurrijk, vers en gevarieerd. Je hoeft er niet over na te denken: gezond eten is gewoon de standaard. Na een paar weken merk je dat je je beter concentreert in de middag en minder naar snacks grijpt. Je lichaam went aan betere brandstof.`,
     impacts:{ 'Gezondheid':5, 'Biodiversiteit':2, 'Emissies':2, 'Betaalbaarheid':1, 'Inclusiviteit':1 },
     clashes:[15], clashReason:'Botst met Eenvoudig assortiment (gevarieerd groente-aanbod verhoogt complexiteit)' },
   { id:12, cat:'gezondheid', icon:'🌿', title:'MEER Verse producten', color:'#d32f2f,#e57373',
     desc:'Zo min mogelijk bewerkt voedsel; dagelijks vers bereid.',
-    info:`Ultra-bewerkt voedsel is gelinkt aan verhoogd risico op obesitas, diabetes type 2 en hart- en vaatziekten. Dagelijks vers bereiden verhoogt de voedingswaarde en vermindert toevoegingen als zout, suiker en conserveermiddelen. Het vraagt meer keukenvaardigheden en tijd, maar medewerkers waarderen de kwaliteitsverbetering sterk. Verse bereiding vergroot ook de betrokkenheid van keukenpersoneel.`,
+    info:`Ultra-bewerkt voedsel is gelinkt aan verhoogd risico op obesitas, diabetes type 2 en hart- en vaatziekten. Dagelijks vers bereiden verhoogt de voedingswaarde en vermindert toevoegingen als zout, suiker en conserveermiddelen. Het vraagt meer keukenvaardigheden en tijd, maar medewerkers waarderen de kwaliteitsverbetering sterk. Verse bereiding vergroot ook de betrokkenheid van keukenpersoneel.
+
+🧑 Wat betekent dit voor jou? Je lunch komt rechtstreeks uit de keuken — niet uit een pak, zak of diepvriezer. Je proeft het verschil: echte smaken, minder zout, geen vreemde toevoegingen. Je weet wat je eet. Na verloop van tijd wil je thuis ook minder bewerkt eten: de kantine inspireert je om zelf ook beter te koken.`,
     impacts:{ 'Gezondheid':5, 'Eerlijke keten':1, 'Betaalbaarheid':-2, 'Emissies':-1, 'Inclusiviteit':1 },
     clashes:[14,15], clashReason:'Botst met Grotere volumes (vers past niet bij bulkinkoop) & Eenvoudig assortiment' },
 
   // ── BETAALBAARHEID ──
   { id:13, cat:'betaalbaarheid', icon:'♻️', title:'MEER Minder voedselverspilling', color:'#e65100,#ffca28',
     desc:'Productie en inkoop optimaliseren om verspilling te halveren.',
-    info:`In Nederland gooit de foodservicesector jaarlijks miljoenen kilo's voedsel weg. Slimmere inkoopplanning, betere portionering en gebruik van reststromen kunnen verspilling halveren. Dat scheelt direct in kosten: minder inkoop, minder afvalverwerking. Maaltijdplanningssoftware en dagelijkse voorraadinventarisatie zijn bewezen effectieve tools. Minder verspilling is ook goed voor het klimaat.`,
+    info:`In Nederland gooit de foodservicesector jaarlijks miljoenen kilo's voedsel weg. Slimmere inkoopplanning, betere portionering en gebruik van reststromen kunnen verspilling halveren. Dat scheelt direct in kosten: minder inkoop, minder afvalverwerking. Maaltijdplanningssoftware en dagelijkse voorraadinventarisatie zijn bewezen effectieve tools. Minder verspilling is ook goed voor het klimaat.
+
+🧑 Wat betekent dit voor jou? De prijs van je lunch daalt — want minder verspilling betekent lagere kosten, en die besparing wordt doorgegeven. Je ziet in de kantine dat er bewuster wordt gekookt: geen bakken eten die worden weggegooid aan het eind van de dag. Dat voelt goed. Je betaalt eerlijk voor wat er echt in zit.`,
     impacts:{ 'Betaalbaarheid':5, 'Emissies':3, 'Biodiversiteit':1, 'Gezondheid':0, 'Eerlijke keten':1 },
     clashes:[6], clashReason:'Botst met Variatie in gewassen (meer soorten = meer risico op verspilling)' },
   { id:14, cat:'betaalbaarheid', icon:'📦', title:'MEER Grotere volumes inkopen', color:'#f57f17,#ffa726',
     desc:'Schaalvoordelen benutten door gezamenlijk of in bulk in te kopen.',
-    info:`Gezamenlijke inkoop met andere bedrijven of inkoopcoöperaties geeft onderhandelingsvoordeel. Grotere volumes leiden tot lagere stuksprijzen. Dit model werkt goed voor droge producten, conserven en non-food. Voor verse producten is het lastiger vanwege houdbaarheid. Inkoopcoöperaties in de zorgsector tonen aan dat 10–20% kostenbesparing haalbaar is zonder in te leveren op kwaliteit.`,
+    info:`Gezamenlijke inkoop met andere bedrijven of inkoopcoöperaties geeft onderhandelingsvoordeel. Grotere volumes leiden tot lagere stuksprijzen. Dit model werkt goed voor droge producten, conserven en non-food. Voor verse producten is het lastiger vanwege houdbaarheid. Inkoopcoöperaties in de zorgsector tonen aan dat 10–20% kostenbesparing haalbaar is zonder in te leveren op kwaliteit.
+
+🧑 Wat betekent dit voor jou? Je lunch wordt goedkoper — soms met een euro of meer per dag. Dat telt op: tientallen euro meer per maand in je zak. Voor medewerkers met een krappe beurs maakt dit echt verschil. Toegang tot een goede warme maaltijd op het werk wordt voor iedereen vanzelfsprekend.`,
     impacts:{ 'Betaalbaarheid':5, 'Emissies':-1, 'Eerlijke keten':-2, 'Biodiversiteit':-1, 'Gezondheid':0 },
     clashes:[1,4,8,12], clashReason:'Botst met Lokaal, NatuurInclusiviteit, Samenwerking met producenten & Verse producten' },
   { id:15, cat:'betaalbaarheid', icon:'🍱', title:'MEER Eenvoudig assortiment', color:'#bf360c,#ff8a65',
     desc:'Compacter menu met minder SKUs en minder complexe recepten.',
-    info:`Een kleiner, goed uitgevoerd menu is goedkoper dan een breed assortiment met veel verschillende ingrediënten. Minder SKUs betekent minder inkoopverspilling, eenvoudigere logistiek en beter inkoopbeheer. Succesvolle cateraars tonen aan dat minder keuze vaak leidt tot hogere tevredenheid. Medewerkers hoeven minder te beslissen en de keuken werkt efficiënter.`,
+    info:`Een kleiner, goed uitgevoerd menu is goedkoper dan een breed assortiment met veel verschillende ingrediënten. Minder SKUs betekent minder inkoopverspilling, eenvoudigere logistiek en beter inkoopbeheer. Succesvolle cateraars tonen aan dat minder keuze vaak leidt tot hogere tevredenheid. Medewerkers hoeven minder te beslissen en de keuken werkt efficiënter.
+
+🧑 Wat betekent dit voor jou? Elke dag twee of drie keuzes — maar die zijn altijd perfect bereid. Geen overweldigend buffet. Je lunch is snel gekozen, goed van kwaliteit en betaalbaar. Eenvoud geeft rust. En de keuken kan zich volledig focussen op het goed maken van wat er is.`,
     impacts:{ 'Betaalbaarheid':5, 'Inclusiviteit':-3, 'Emissies':1, 'Gezondheid':-1, 'Biodiversiteit':-1 },
     clashes:[5,6,9,11,12], clashReason:'Botst met Seizoensproducten, Variatie in gewassen, Transparante Herkomst, Fruit & groente & Verse producten' },
 
   // ── INCLUSIVITEIT ──
   { id:16, cat:'inclusiviteit', icon:'🕌', title:'MEER Halal en Koosjer opties', color:'#6a1b9a,#ab47bc',
     desc:'Gecertificeerde halal en koosjer maaltijden structureel in het aanbod.',
-    info:`In Nederland is circa 5% van de bevolking moslim en een kleinere groep joods. Zonder passende opties zijn deze medewerkers aangewezen op alternatief eten van buiten, wat hen uitsluit van de gemeenschappelijke eetcultuur op het werk. Gecertificeerde halal en koosjer catering vereist gescheiden bereidingsruimte of specifieke leveranciers, maar de investering vergroot inclusie significant.`,
+    info:`In Nederland is circa 5% van de bevolking moslim en een kleinere groep joods. Zonder passende opties zijn deze medewerkers aangewezen op alternatief eten van buiten, wat hen uitsluit van de gemeenschappelijke eetcultuur op het werk. Gecertificeerde halal en koosjer catering vereist gescheiden bereidingsruimte of specifieke leveranciers, maar de investering vergroot inclusie significant.
+
+🧑 Wat betekent dit voor jou? Als moslim of joodse medewerker kun je eindelijk gewoon aanschuiven bij de lunch — zonder twijfel, zonder gedoe, zonder een broodje van thuis mee te nemen. Je bent er gewoon bij. Voor wie het nodig heeft verandert alles: je voelt je gezien en welkom.`,
     impacts:{ 'Inclusiviteit':5, 'Eerlijke keten':1, 'Betaalbaarheid':-2, 'Gezondheid':1, 'Biodiversiteit':0 },
     clashes:[3,15], clashReason:'Botst met Plantaardig als default (halal vereist vlees-opties) & Eenvoudig assortiment' },
   { id:17, cat:'inclusiviteit', icon:'🥗', title:'MEER Vegetarische alternatieven', color:'#7b1fa2,#ce93d8',
     desc:'Volwaardig vegetarisch alternatief bij elke maaltijd.',
-    info:`Circa 5% van de Nederlanders eet vegetarisch, maar veel meer mensen eten flexitarisch of kiezen regelmatig voor vleesvervanger. Een volwaardig, smakelijk vegetarisch alternatief bij elke maaltijd is geen luxe maar een basisvereiste voor een inclusief aanbod. Bovendien is vegetarisch doorgaans goedkoper in inkoop dan vlees, wat de betaalbaarheid ondersteunt.`,
+    info:`Circa 5% van de Nederlanders eet vegetarisch, maar veel meer mensen eten flexitarisch of kiezen regelmatig voor vleesvervanger. Een volwaardig, smakelijk vegetarisch alternatief bij elke maaltijd is geen luxe maar een basisvereiste voor een inclusief aanbod. Bovendien is vegetarisch doorgaans goedkoper in inkoop dan vlees, wat de betaalbaarheid ondersteunt.
+
+🧑 Wat betekent dit voor jou? Of je nu vegetariër bent, af en toe flexitarisch eet of gewoon zin hebt in iets anders — er is altijd een volwaardige optie voor je. Je hoeft nooit meer genoegen te nemen met een slappe salade als het vegetarische alternatief. Een echte, voedzame, smakelijke maaltijd — elke dag.`,
     impacts:{ 'Inclusiviteit':5, 'Emissies':2, 'Biodiversiteit':2, 'Betaalbaarheid':1, 'Gezondheid':1 },
     clashes:[5], clashReason:'Botst met Seizoensproducten (seizoen beperkt beschikbaarheid van vaste vegetarische opties)' },
   { id:18, cat:'inclusiviteit', icon:'💚', title:'MEER Goedkope maaltijden', color:'#4a148c,#9575cd',
     desc:'Elke dag een voedzame maaltijd voor minder dan €3,50.',
-    info:`Niet elke medewerker heeft hetzelfde budget. Een dagelijkse voedzame maaltijdoptie voor minder dan €3,50 zorgt dat ook lager betaalde medewerkers volwaardig kunnen mee-eten. Dit versterkt sociale cohesie op de werkvloer en vermindert gezondheidsverschillen. Het kan worden aangeboden via subsidie vanuit het bedrijf of slimme inkoop- en receptuurkeuzes. Eenvoud is de sleutel.`,
+    info:`Niet elke medewerker heeft hetzelfde budget. Een dagelijkse voedzame maaltijdoptie voor minder dan €3,50 zorgt dat ook lager betaalde medewerkers volwaardig kunnen mee-eten. Dit versterkt sociale cohesie op de werkvloer en vermindert gezondheidsverschillen. Het kan worden aangeboden via subsidie vanuit het bedrijf of slimme inkoop- en receptuurkeuzes. Eenvoud is de sleutel.
+
+🧑 Wat betekent dit voor jou? Je hoeft nooit meer te kiezen tussen een goede lunch en andere uitgaven. Voor 3,50 euro of minder staat er elke dag een warme, voedzame maaltijd voor je klaar. Dat geeft rust. Je kunt gewoon mee-eten met collega's zonder je zorgen te maken over de kosten. Eten op het werk is voor iedereen.`,
     impacts:{ 'Inclusiviteit':5, 'Betaalbaarheid':3, 'Gezondheid':1, 'Eerlijke keten':-1, 'Emissies':0 },
     clashes:[7,12], clashReason:'Botst met Fair Trade (hogere inkoopkosten) & Verse producten (hogere bereidingskosten)' },
 ];
@@ -653,56 +760,12 @@ function matchColor(pct) {
 /* ══════════════════════════════════
    BUILDING RENDERER (SVG-like via HTML)
 ══════════════════════════════════ */
-function buildingHTML(b, idx) {
-  const visited = visitedBuildings.has(b.id);
-  const hasCard = !!selectedCards[b.id];
-
-  // make buildings different heights for skyline variety
-  const heights = [220, 180, 260, 175, 215, 200];
-  const widths  = [125, 150, 115, 148, 130, 158];
-  const H = heights[idx], W = widths[idx];
-
-  let roofHtml = '';
-  if (b.roofType === 'tri') {
-    roofHtml = `<div style="width:0;height:0;border-left:${W/2}px solid transparent;border-right:${W/2}px solid transparent;border-bottom:30px solid ${b.roofColor};margin-bottom:-1px"></div>`;
-  } else if (b.roofType === 'dome') {
-    roofHtml = `<div style="width:${W}px;height:30px;background:${b.roofColor};border-radius:${W/2}px ${W/2}px 0 0;margin-bottom:-1px"></div>`;
-  } else {
-    roofHtml = `<div style="width:${W+8}px;height:12px;background:${b.roofColor};border-radius:3px 3px 0 0;margin-bottom:-1px"></div>`;
-  }
-
-  // windows
-  const wCols = Math.floor(W/28);
-  const wRows = Math.floor(H/40);
-  let windowsHtml = '';
-  for (let r=0; r<Math.min(wRows,4); r++) {
-    windowsHtml += `<div style="display:flex;gap:6px;margin-bottom:8px">`;
-    for (let c=0; c<Math.max(wCols,2); c++) {
-      const lit = Math.random() > 0.35;
-      windowsHtml += `<div style="width:20px;height:26px;border-radius:2px 2px 0 0;background:${lit?'#fffde7':'rgba(0,0,0,0.25)'};border:1px solid rgba(0,0,0,0.2);${lit?'box-shadow:0 0 6px 2px rgba(255,236,64,0.4)':''}"></div>`;
-    }
-    windowsHtml += `</div>`;
-  }
-
-  return `
-    <div class="building-wrap ${visited?'visited':''}" onclick="enterBuilding('${b.id}')" title="${b.fullLabel}">
-      <div class="b-check" style="display:${hasCard?'flex':'none'}">✓</div>
-      ${roofHtml}
-      <div class="building-body" style="width:${W}px;height:${H}px;background:${b.bColor};position:relative">
-        <div class="b-banner" style="font-size:26px">${b.icon}</div>
-        <div style="position:absolute;bottom:36px;left:0;right:0;display:flex;flex-direction:column;align-items:center">
-          ${windowsHtml}
-        </div>
-        <div class="b-label" style="position:absolute;bottom:36px;left:0;right:0;text-align:center;padding:0 6px">${hasCard?'✓ klaar':''}</div>
-        <div class="b-door" style="width:32px;height:46px;border-radius:4px 4px 0 0;background:rgba(0,0,0,0.35);border:1px solid rgba(0,0,0,0.3);position:absolute;bottom:0;left:50%;transform:translateX(-50%)"></div>
-      </div>
-      <div class="b-name-tag">${b.icon} ${b.label}</div>
-    </div>`;
-}
-
 function renderStreet() {
-  document.getElementById('buildingsRow').innerHTML =
-    BUILDINGS.map((b,i) => buildingHTML(b,i)).join('');
+  BUILDINGS.forEach(b => {
+    const el = document.querySelector(`.building-hit[data-cat="${b.id}"]`);
+    if (!el) return;
+    el.classList.toggle('has-card', !!selectedCards[b.id]);
+  });
   renderTopVisited();
 }
 
@@ -717,6 +780,12 @@ function renderTopVisited() {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  document.getElementById('topbar').style.display = (id === 'startScreen') ? 'none' : 'flex';
+}
+
+function startGame() {
+  renderStreet();
+  showScreen('streetScreen');
 }
 
 function enterBuilding(catId) {
@@ -749,8 +818,7 @@ function restartGame() {
   visitedBuildings = new Set();
   currentBuilding = null;
   renderStreet();
-  showScreen('streetScreen');
-  document.getElementById('welcomeCard').style.display = '';
+  showScreen('startScreen');
 }
 
 /* ══════════════════════════════════
@@ -885,31 +953,57 @@ function renderResults() {
     document.getElementById('matchFill').style.background = matchColor(pct);
   }, 80);
 
+  // personal summary
+  const summaryEl = document.getElementById('personalSummary');
+  const selCards = ids.map(id => CARDS.find(c => c.id === id)).filter(Boolean);
+  if (selCards.length > 0) {
+    summaryEl.innerHTML = `
+      <div class="personal-summary-title">🧑 Wat verandert er voor jou?</div>
+      <div class="personal-summary-cards">
+        ${selCards.map(card => {
+          const parts = card.info.split('🧑');
+          const personalRaw = parts[1] ? parts[1].replace(/^[^?]*\?/, '').trim() : '';
+          if (!personalRaw) return '';
+          return `
+            <div class="summary-item">
+              <div class="summary-icon">${card.icon}</div>
+              <div class="summary-text">
+                <div class="summary-card-title">${card.title}</div>
+                <div class="summary-card-personal">${personalRaw}</div>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>`;
+  }
   // legend
   document.getElementById('rLegend').innerHTML = THEMES.map((t,i)=>
     `<div class="r-legend-item"><span class="ldot" style="background:${THEME_COLORS[i]}"></span>${THEME_ICONS[i]} ${t}</div>`).join('');
 
-  // picked cards
+  // picked cards — speelkaart stijl, 3 naast elkaar
   document.getElementById('picksList').innerHTML = ids.length === 0
     ? '<p style="color:#9ac09e;font-size:13px;font-style:italic">Nog geen kaarten gekozen.</p>'
-    : ids.map(id => {
+    : `<div class="picks-card-grid">${ids.map(id => {
         const card = CARDS.find(c=>c.id===id);
         if (!card) return '';
         const bld = BUILDINGS.find(b=>b.id===card.cat);
         const pills = Object.entries(card.impacts).map(([t,v])=>{
-          const p=THEME_PILL[t]; return `<span class="pick-pill" style="background:${p.bg};color:${p.text}">${v>0?'+':''}${v} ${t}</span>`;
+          const p=THEME_PILL[t];
+          return `<span class="impact-pill" style="background:${p.bg};color:${p.text};font-size:9px;padding:2px 5px;border-radius:4px;font-weight:700;white-space:nowrap">${v>0?'+':''}${v} ${t}</span>`;
         }).join('');
-        return `<div class="pick-card-full">
-          <div class="pick-stripe" style="background:linear-gradient(180deg,${card.color})"></div>
-          <div class="pick-content">
-            <div class="pick-cat">${bld?.icon} ${bld?.fullLabel}</div>
-            <div class="pick-title">${card.title}</div>
-            <div class="pick-desc">${card.desc}</div>
-            <div class="pick-pills">${pills}</div>
-          </div>
-          <div class="pick-icon">${card.icon}</div>
-        </div>`;
-      }).join('');
+        return `
+          <div class="result-card" style="background:linear-gradient(160deg,${card.color})">
+            <div class="result-card-hdr">
+              <span style="font-size:13px">${card.icon}</span>
+              <span style="font-size:8px;font-weight:700;color:rgba(255,255,255,0.4)">${bld?.label||''}</span>
+            </div>
+            <div class="result-card-icon">${card.icon}</div>
+            <div class="result-card-body">
+              <div class="result-card-title">${card.title}</div>
+              <div class="result-card-desc">${card.desc}</div>
+              <div class="result-card-impacts">${pills}</div>
+            </div>
+          </div>`;
+      }).join('')}</div>`;
 
   // bars
   document.getElementById('themeBars').innerHTML = THEMES.map((t,i) => {
@@ -951,6 +1045,9 @@ function openCardPopup(catId, cardId) {
   }).join('');
 
   // extract first colour from gradient for icon bg
+  const parts = card.info.split('🧑');
+  const policyText = parts[0].trim();
+  const personalText = parts[1] ? parts[1].replace(/^[^?]*\?/, '').trim() : '';
   const bgColor = card.color.split(',')[0];
 
   document.getElementById('popupContent').innerHTML = `
@@ -963,7 +1060,11 @@ function openCardPopup(catId, cardId) {
       </div>
       <button class="popup-close" onclick="closePopup()">✕</button>
     </div>
-    <div class="popup-info">${card.info}</div>
+    <div class="popup-info">${policyText}</div>
+    <div class="popup-personal">
+      <div class="popup-personal-label">🧑 Wat betekent dit voor jou?</div>
+      <div class="popup-personal-text">${personalText}</div>
+    </div>
     <div class="popup-impacts">${pills}</div>
     <div class="popup-actions">
       <button class="popup-btn-back" onclick="closePopup()">← Terug</button>
