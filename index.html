@@ -50,17 +50,20 @@ body { background: var(--sky1); }
 
 /* ══ IMAGE BACKGROUND SCREENS ══ */
 .bg-screen {
-  background: #b8e4f0;
-  overflow: auto;
+  background: #ffffff;
+  display: flex;
   justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 .bg-screen-inner {
   position: relative;
-  width: 100%;
-  align-self: flex-start;
+  height: 100%;
+  width: auto;
+  flex-shrink: 0;
 }
 .bg-screen-inner img {
-  width: 100%; height: auto; display: block;
+  height: 100%; width: auto; display: block;
   user-select: none; pointer-events: none;
 }
 .hit-area {
