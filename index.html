@@ -121,8 +121,23 @@ body { background: var(--sky1); }
 
 /* ══ INSIDE SCREEN ══ */
 #insideScreen {
-  flex-direction: column; background: var(--cream);
+  position: fixed;
+  flex-direction: column; background: var(--sky1);
   overflow-y: auto;
+}
+.inside-bg-img {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+.inside-bg-overlay {
+  position: fixed; inset: 0;
+  background: rgba(255,255,255,0.82);
+  z-index: 1;
+}
+.inside-header, .inside-body {
+  position: relative; z-index: 2;
 }
 .inside-header {
   padding: 1.5rem 2rem 1rem;
@@ -194,7 +209,7 @@ body { background: var(--sky1); }
 
 /* ══ RESULTS SCREEN ══ */
 #resultsScreen {
-  flex-direction: column; background: var(--cream); overflow-y: auto;
+  flex-direction: column; background: var(--sky1); overflow-y: auto;
 }
 .results-header {
   padding: 2rem 2rem 1.25rem; border-bottom: 1px solid rgba(0,0,0,0.08);
@@ -472,6 +487,8 @@ body { background: var(--sky1); }
 
 <!-- INSIDE SCREEN -->
 <div class="screen" id="insideScreen">
+  <img src="images/cards-bg.png" alt="" class="inside-bg-img">
+  <div class="inside-bg-overlay"></div>
   <div class="inside-header" id="insideHeader"></div>
   <div class="inside-body">
     <p class="inside-instruction" id="insideInstruction"></p>
